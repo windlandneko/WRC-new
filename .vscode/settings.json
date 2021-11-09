@@ -1,0 +1,5 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "python.pythonPath": "c:\\Users\\27636\\PycharmProjects\\txt2PPTiamge\\venv\\Scripts\\python.exe",
+    "python.formatting.provider": "yapf"
+}
