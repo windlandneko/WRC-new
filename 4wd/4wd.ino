@@ -244,12 +244,9 @@ void setup()
   up2 = button11_Up2;
   gp = button11_Gp;
 
-  if (up1 > 180)
-    up1 = 90;
-  if (up2 > 180)
-    up2 = 90;
-  if (gp > 180)
-    gp = 90;
+  up1 = up1 > 180 ? 90 : up1;
+  up2 = up2 > 180 ? 90 : up2;
+  gp = gp > 180 ? 90 : gp;
 
   joyStickData[1] = 3;
   t = millis();
@@ -261,12 +258,12 @@ void setup()
 
 void loop()
 {
-  unsigned long b = getRFModuleRemoteCodePin(0);
-  if (b == 294) // 当1,2,5,8号按钮同时按下时进入设置模式
-    setting();
+  unsigned long joyStickInput = getRFModuleRemoteCodePin(0);
+  if (joyStickInput == 294) // 294 = 2^1 + 2^2 + 2^5 + 2^8
+    setting();  // 当1,2,5,8号按钮同时按下时进入设置模式
   else
   {
-    if (b == 1) // 0号按钮
+    if (joyStickInput == 1) // 0号按钮
     {
       if (button11_Gp > button0_Gp)
         servo(gpPin, button11_Gp + 7);
@@ -277,7 +274,7 @@ void loop()
       servo(up2Pin, button0_Up2);
     }
 
-    if (b == 2048) // 11号按钮
+    if (joyStickInput == 2048) // 11号按钮
     {
       servo(gpPin, button0_Gp);
       delay(500);
@@ -285,21 +282,21 @@ void loop()
       servo(up2Pin, button11_Up2);
     }
 
-    if (b & 2) // 1号按钮
+    if (joyStickInput & 2) // 1号按钮
     {
       servo(up1Pin, button0_Up1);
       servo(up2Pin, button0_Up2);
     }
-    if (b & 4) // 2号按钮
+    if (joyStickInput & 4) // 2号按钮
     {
       servo(gpPin, button0_Gp);
     }
-    if (b & 8) // 3号按钮
+    if (joyStickInput & 8) // 3号按钮
     {
       servo(up1Pin, button11_Up1);
       servo(up2Pin, button11_Up2);
     }
-    if (b == 16) // 4号按钮
+    if (joyStickInput == 16) // 4号按钮
     {
       if (button11_Gp > button0_Gp)
         servo(gpPin, button11_Gp + 7);
@@ -348,19 +345,15 @@ void loop()
     mdgo = map(joyStickData[1], -100, 100, maxspeed, -maxspeed);
   }
   else
-  {
-    mago = 0;
-    mbgo = 0;
-    mcgo = 0;
-    mdgo = 0;
-  }
+    mago = mbgo = mcgo = mdgo = 0;
 
   joyStickData[4] = 0;
+
   int xxx = getRFModuleRemoteRockerPin(0, ROCKER_RIGHT, ROCKER_X);
   if (xxx != 999)
     joyStickData[4] = -xxx / 2;
 
-  if ((joyStickData[4] > L) || (joyStickData[4] < R))
+  if (L < joyStickData[4] || joyStickData[4] < R)
   {
     maturn = map(joyStickData[4], -100, 100, 70, -70);
     mbturn = map(joyStickData[4], -100, 100, -70, 70);
@@ -368,12 +361,7 @@ void loop()
     mdturn = map(joyStickData[4], -100, 100, 70, -70);
   }
   else
-  {
-    maturn = 0;
-    mbturn = 0;
-    mcturn = 0;
-    mdturn = 0;
-  }
+    maturn = mbturn = mcturn = mdturn = 0;
 
   ref1 = max(min(mafor + mago + maturn, maxspeed), -maxspeed);
   ref2 = max(min(mbfor + mbgo + mbturn, maxspeed), -maxspeed);
@@ -401,7 +389,7 @@ void loop()
     Serial.print(", ");
     Serial.print(M4S);
     Serial.print(", ");
-    Serial.println(b);
+    Serial.println(joyStickInput);
 
     if ((joyStickData[1] < L) && (joyStickData[1] > R) && (joyStickData[2] < L) && (joyStickData[2] > R) && (joyStickData[4] < L) && (joyStickData[4] > R))
       stop_all();
