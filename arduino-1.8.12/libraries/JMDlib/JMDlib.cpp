@@ -1,24 +1,24 @@
 /************BE5141v15---Mega2560************/
 
 #include <JMDlib.h>
-//System----------------------------------------------------------------------------
+// System----------------------------------------------------------------------------
 /****读取系统时间****/
-uint32_t getSystemTime_ms() //毫秒
+uint32_t getSystemTime_ms() // 毫秒
 {
 	return millis();
 }
-uint32_t getSystemTime_us() //微秒
+uint32_t getSystemTime_us() // 微秒
 {
 	return micros();
 }
 
 /****延时时间****/
-void setDelay_ms(uint32_t _time_ms) //毫秒
+void setDelay_ms(uint32_t _time_ms) // 毫秒
 {
 	delay(_time_ms);
 }
 
-void setDelay_us(uint32_t _time_us) //微秒
+void setDelay_us(uint32_t _time_us) // 微秒
 {
 	delayMicroseconds(_time_us);
 }
@@ -26,7 +26,7 @@ void setDelay_us(uint32_t _time_us) //微秒
 /****串口0输出（函数重载）****/
 uint8_t strFlag = 0;
 uint8_t numFlag = 0;
-void setUart(uint32_t baud, const char *str) //字符-字符串
+void setUart(uint32_t baud, const char *str) // 字符-字符串
 {
 	if (strFlag == 0)
 	{
@@ -36,7 +36,7 @@ void setUart(uint32_t baud, const char *str) //字符-字符串
 	Serial.println(str);
 }
 
-void setUart(uint32_t baud, long longNum) //变量-常量
+void setUart(uint32_t baud, long longNum) // 变量-常量
 {
 	if (numFlag == 0)
 	{
@@ -47,20 +47,20 @@ void setUart(uint32_t baud, long longNum) //变量-常量
 }
 
 /****数字端口****/
-void setDigitalPin(uint8_t pin, uint8_t HIGH_LOW) //DIGITAL输出
+void setDigitalPin(uint8_t pin, uint8_t HIGH_LOW) // DIGITAL输出
 {
 	pinMode(pin, OUTPUT);
 	digitalWrite(pin, HIGH_LOW);
 }
 
-int getDigitalPin(uint8_t pin) //DIGITAL输入
+int getDigitalPin(uint8_t pin) // DIGITAL输入
 {
 	pinMode(pin, INPUT);
 	return digitalRead(pin);
 }
 
 /****模拟端口****/
-int getAnalogPin(uint8_t pin) //ANALOG输入
+int getAnalogPin(uint8_t pin) // ANALOG输入
 {
 	int value;
 	value = analogRead(pin);
@@ -78,18 +78,18 @@ void setPWMPin(uint8_t pin, uint8_t value)
 		value = 255;
 	else if (value < 0)
 		value = 0;
-	analogWrite(pin, value); //0-255
+	analogWrite(pin, value); // 0-255
 }
 
 /****模拟IIC****/
-const uint8_t _iic_pin[10][2] = {{15, 14}, {17, 16}, {0, 1}, {2, 38}, {3, 39}, {18, 40}, {19, 41}, {0, 0}, {0, 0}, {0, 0}}; //IIC端口
+const uint8_t _iic_pin[10][2] = {{15, 14}, {17, 16}, {0, 1}, {2, 38}, {3, 39}, {18, 40}, {19, 41}, {0, 0}, {0, 0}, {0, 0}}; // IIC端口
 
 uint8_t _SCL;
 uint8_t _SDA;
 uint8_t I2C_SPEED;
 uint8_t I2C_PIC;
 
-void set_I2C_Init(uint8_t pin) //初始化
+void set_I2C_Init(uint8_t pin) // 初始化
 {
 	if (pin >= 10)
 		return;
@@ -100,7 +100,7 @@ void set_I2C_Init(uint8_t pin) //初始化
 	}
 }
 
-void Soft_I2C_Delay(void) //延时10KHz
+void Soft_I2C_Delay(void) // 延时10KHz
 {
 	int ri;
 	for (ri = 0; ri < 50; ri++)
@@ -112,10 +112,10 @@ void Soft_I2C_Delay(void) //延时10KHz
 		for( ri=0; ri<700; ri++ );
 	else if(I2C_PIC==1)
 		for( ri=0; ri<200; ri++ );
-	//*/
+	*/
 }
 
-void Soft_I2C_Start(void) //启动IIC
+void Soft_I2C_Start(void) // 启动IIC
 {
 	SET_SDA;
 	SET_SDA_DDR;
@@ -130,7 +130,7 @@ void Soft_I2C_Start(void) //启动IIC
 	Soft_I2C_Delay();
 }
 
-void Soft_I2C_Stop(void) //停止IIC
+void Soft_I2C_Stop(void) // 停止IIC
 {
 	SET_SDA_DDR;
 	SET_SCL_DDR;
@@ -142,7 +142,7 @@ void Soft_I2C_Stop(void) //停止IIC
 	Soft_I2C_Delay();
 }
 
-uint8_t Soft_I2C_Write(uint8_t wb) //写数据
+uint8_t Soft_I2C_Write(uint8_t wb) // 写数据
 {
 	uint8_t ack = 0;
 	int i;
@@ -174,7 +174,7 @@ uint8_t Soft_I2C_Write(uint8_t wb) //写数据
 	return ack;
 }
 
-uint8_t Soft_I2C_Read(uint8_t rb) //读数据
+uint8_t Soft_I2C_Read(uint8_t rb) // 读数据
 {
 	uint8_t i, mb;
 	mb = 0;
@@ -205,35 +205,35 @@ uint8_t Soft_I2C_Read(uint8_t rb) //读数据
 	Soft_I2C_Delay();
 	return mb;
 }
-//----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-//Sensor----------------------------------------------------------------------------
-//Motor
+// Sensor----------------------------------------------------------------------------
+// Motor
 /****电机输出v11****/
-uint8_t MotorFlag1 = 0; //M1初始化标志位
-uint8_t MotorFlag2 = 0; //M2初始化标志位
-uint8_t MotorFlag3 = 0; //M3初始化标志位
-uint8_t MotorFlag4 = 0; //M4初始化标志位
+uint8_t MotorFlag1 = 0; // M1初始化标志位
+uint8_t MotorFlag2 = 0; // M2初始化标志位
+uint8_t MotorFlag3 = 0; // M3初始化标志位
+uint8_t MotorFlag4 = 0; // M4初始化标志位
 
-//motor 1
-uint8_t PWMA = 10; //speed control
-uint8_t AIN1 = 22; //Direction
-uint8_t AIN2 = 23; //Direction
+// motor 1
+uint8_t PWMA = 10; // speed control
+uint8_t AIN1 = 22; // Direction
+uint8_t AIN2 = 23; // Direction
 
-//motor 2
-uint8_t PWMB = 11; //speed control
-uint8_t BIN1 = 24; //Direction
-uint8_t BIN2 = 25; //Direction
+// motor 2
+uint8_t PWMB = 11; // speed control
+uint8_t BIN1 = 24; // Direction
+uint8_t BIN2 = 25; // Direction
 
-//motor 3
-uint8_t PWMC = 12; //speed control
-uint8_t CIN1 = 28; //Direction
-uint8_t CIN2 = 29; //Direction
+// motor 3
+uint8_t PWMC = 12; // speed control
+uint8_t CIN1 = 28; // Direction
+uint8_t CIN2 = 29; // Direction
 
-//motor 4
-uint8_t PWMD = 13; //speed control
-uint8_t DIN1 = 26; //Direction
-uint8_t DIN2 = 27; //Direction
+// motor 4
+uint8_t PWMD = 13; // speed control
+uint8_t DIN1 = 26; // Direction
+uint8_t DIN2 = 27; // Direction
 
 /****电机输出v15****/
 uint8_t PWMA1 = 10;
@@ -550,8 +550,8 @@ void setFanPin(uint8_t motor, uint8_t motorDir, int speed)
 
 /****编码****/
 /*
- *attachInterrupt(interrupt, function, mode);//配置外部中断函数
- *detachInterrupt(interrupt);				 //关闭外部中断
+ *attachInterrupt(interrupt, function, mode);// 配置外部中断函数
+ *detachInterrupt(interrupt);				 // 关闭外部中断
  *interrupt	中断通道编号0-5,Atmega2560使用0 1 5 4 (对应引脚2 3 18 19),中断通道编号2 3(对应引脚21 20--SCL/SDA)
  *function	中断服务函数(void 任意函数名(void){})
  *mode		为中断触发模式
@@ -560,56 +560,56 @@ void setFanPin(uint8_t motor, uint8_t motorDir, int speed)
  **RISING	上升沿触发
  **FALLING	下降沿触发
  */
-uint8_t CodeFlag1 = 0; //编码1初始化标志位
-uint8_t CodeFlag2 = 0; //编码2初始化标志位
-uint8_t CodeFlag3 = 0; //编码3初始化标志位
-uint8_t CodeFlag4 = 0; //编码4初始化标志位
+uint8_t CodeFlag1 = 0; // 编码1初始化标志位
+uint8_t CodeFlag2 = 0; // 编码2初始化标志位
+uint8_t CodeFlag3 = 0; // 编码3初始化标志位
+uint8_t CodeFlag4 = 0; // 编码4初始化标志位
 
-long MotorCodeCnt1 = 0; //M1编码计数
-long MotorCodeCnt2 = 0; //M2编码计数
-long MotorCodeCnt3 = 0; //M3编码计数
-long MotorCodeCnt4 = 0; //M4编码计数
+long MotorCodeCnt1 = 0; // M1编码计数
+long MotorCodeCnt2 = 0; // M2编码计数
+long MotorCodeCnt3 = 0; // M3编码计数
+long MotorCodeCnt4 = 0; // M4编码计数
 
 /****ISR中断服务函数****/
-void getCode1Interrupt() //中断函数ISP: Interrupt 0--Code1
+void getCode1Interrupt() // 中断函数ISP: Interrupt 0--Code1
 {
-	uint8_t m_ISR, m_Dir;	   //读取两个的方向
-	m_ISR = getDigitalPin(2);  //中断IO
-	m_Dir = getDigitalPin(38); //数字输入IO
-	if (m_ISR ^ m_Dir)		   //正交脉冲
-		MotorCodeCnt1--;	   //正转--
+	uint8_t m_ISR, m_Dir;	   // 读取两个的方向
+	m_ISR = getDigitalPin(2);  // 中断IO
+	m_Dir = getDigitalPin(38); // 数字输入IO
+	if (m_ISR ^ m_Dir)		   // 正交脉冲
+		MotorCodeCnt1--;	   // 正转--
 	else
-		MotorCodeCnt1++; //反转++
+		MotorCodeCnt1++; // 反转++
 }
-void getCode2Interrupt() //中断函数ISP: Interrupt 1--Code2
+void getCode2Interrupt() // 中断函数ISP: Interrupt 1--Code2
 {
-	uint8_t m_ISR, m_Dir;	   //读取两个的方向
-	m_ISR = getDigitalPin(3);  //中断IO
-	m_Dir = getDigitalPin(39); //数字输入IO
-	if (m_ISR ^ m_Dir)		   //正交脉冲
-		MotorCodeCnt2--;	   //正转--
+	uint8_t m_ISR, m_Dir;	   // 读取两个的方向
+	m_ISR = getDigitalPin(3);  // 中断IO
+	m_Dir = getDigitalPin(39); // 数字输入IO
+	if (m_ISR ^ m_Dir)		   // 正交脉冲
+		MotorCodeCnt2--;	   // 正转--
 	else
-		MotorCodeCnt2++; //反转++
+		MotorCodeCnt2++; // 反转++
 }
-void getCode3Interrupt() //中断函数ISP: Interrupt 5--Code3
+void getCode3Interrupt() // 中断函数ISP: Interrupt 5--Code3
 {
-	uint8_t m_ISR, m_Dir;	   //读取两个的方向
-	m_ISR = getDigitalPin(18); //中断IO
-	m_Dir = getDigitalPin(40); //数字输入IO
-	if (m_ISR ^ m_Dir)		   //正交脉冲
-		MotorCodeCnt3--;	   //正转--
+	uint8_t m_ISR, m_Dir;	   // 读取两个的方向
+	m_ISR = getDigitalPin(18); // 中断IO
+	m_Dir = getDigitalPin(40); // 数字输入IO
+	if (m_ISR ^ m_Dir)		   // 正交脉冲
+		MotorCodeCnt3--;	   // 正转--
 	else
-		MotorCodeCnt3++; //反转++
+		MotorCodeCnt3++; // 反转++
 }
-void getCode4Interrupt() //中断函数ISP: Interrupt 4--Code4
+void getCode4Interrupt() // 中断函数ISP: Interrupt 4--Code4
 {
-	uint8_t m_ISR, m_Dir;	   //读取两个的方向
-	m_ISR = getDigitalPin(19); //中断IO
-	m_Dir = getDigitalPin(41); //数字输入IO
-	if (m_ISR ^ m_Dir)		   //正交脉冲
-		MotorCodeCnt4--;	   //正转--
+	uint8_t m_ISR, m_Dir;	   // 读取两个的方向
+	m_ISR = getDigitalPin(19); // 中断IO
+	m_Dir = getDigitalPin(41); // 数字输入IO
+	if (m_ISR ^ m_Dir)		   // 正交脉冲
+		MotorCodeCnt4--;	   // 正转--
 	else
-		MotorCodeCnt4++; //反转++
+		MotorCodeCnt4++; // 反转++
 }
 
 /****编码初始化****/
@@ -619,16 +619,16 @@ void setCodeInit(uint8_t interrupt)
 	{
 	case m1:
 		attachInterrupt(0, getCode1Interrupt, CHANGE);
-		break; //当Init.0电平改变时,触发中断函数getCode1Interrupt
+		break; // 当Init.0电平改变时,触发中断函数getCode1Interrupt
 	case m2:
 		attachInterrupt(1, getCode2Interrupt, CHANGE);
-		break; //当Init.1电平改变时,触发中断函数getCode2Interrupt
+		break; // 当Init.1电平改变时,触发中断函数getCode2Interrupt
 	case m3:
 		attachInterrupt(5, getCode3Interrupt, CHANGE);
-		break; //当Init.5电平改变时,触发中断函数getCode3Interrupt
+		break; // 当Init.5电平改变时,触发中断函数getCode3Interrupt
 	case m4:
 		attachInterrupt(4, getCode4Interrupt, CHANGE);
-		break; //当Init.4电平改变时,触发中断函数getCode4Interrupt
+		break; // 当Init.4电平改变时,触发中断函数getCode4Interrupt
 	default:
 		break;
 	}
@@ -642,37 +642,37 @@ long getCodePin(uint8_t code)
 	if (CodeFlag1 == 0 && code == m1)
 	{
 		CodeFlag1 = 1;
-		setCodeInit(code); //初始化
+		setCodeInit(code); // 初始化
 	}
 	else if (CodeFlag2 == 0 && code == m2)
 	{
 		CodeFlag2 = 1;
-		setCodeInit(code); //初始化
+		setCodeInit(code); // 初始化
 	}
 	else if (CodeFlag3 == 0 && code == m3)
 	{
 		CodeFlag3 = 1;
-		setCodeInit(code); //初始化
+		setCodeInit(code); // 初始化
 	}
 	else if (CodeFlag4 == 0 && code == m4)
 	{
 		CodeFlag4 = 1;
-		setCodeInit(code); //初始化
+		setCodeInit(code); // 初始化
 	}
 	switch (code)
 	{
 	case m1:
 		return MotorCodeCnt1;
-		break; //返回编码1数值
+		break; // 返回编码1数值
 	case m2:
 		return MotorCodeCnt2;
-		break; //返回编码2数值
+		break; // 返回编码2数值
 	case m3:
 		return MotorCodeCnt3;
-		break; //返回编码3数值
+		break; // 返回编码3数值
 	case m4:
 		return MotorCodeCnt4;
-		break; //返回编码4数值
+		break; // 返回编码4数值
 	default:
 		break;
 	}
@@ -688,16 +688,16 @@ void setClearCodePin(uint8_t code)
 	{
 	case m1:
 		MotorCodeCnt1 = 0;
-		break; //清零编码1数值
+		break; // 清零编码1数值
 	case m2:
 		MotorCodeCnt2 = 0;
-		break; //清零编码2数值
+		break; // 清零编码2数值
 	case m3:
 		MotorCodeCnt3 = 0;
-		break; //清零编码3数值
+		break; // 清零编码3数值
 	case m4:
 		MotorCodeCnt4 = 0;
-		break; //清零编码4数值
+		break; // 清零编码4数值
 	default:
 		break;
 	}
@@ -715,28 +715,28 @@ void setCloseCodeInterruptPin(uint8_t code)
 		detachInterrupt(0);
 		MotorCodeCnt1 = 0;
 		CodeFlag1 = 0;
-		break; //禁用外部中断0,清零编码1数值
+		break; // 禁用外部中断0,清零编码1数值
 	case m2:
 		detachInterrupt(1);
 		MotorCodeCnt2 = 0;
 		CodeFlag2 = 0;
-		break; //禁用外部中断1,清零编码2数值
+		break; // 禁用外部中断1,清零编码2数值
 	case m3:
 		detachInterrupt(5);
 		MotorCodeCnt3 = 0;
 		CodeFlag3 = 0;
-		break; //禁用外部中断5,清零编码3数值
+		break; // 禁用外部中断5,清零编码3数值
 	case m4:
 		detachInterrupt(4);
 		MotorCodeCnt4 = 0;
 		CodeFlag4 = 0;
-		break; //禁用外部中断4,清零编码4数值
+		break; // 禁用外部中断4,清零编码4数值
 	default:
 		break;
 	}
 }
 
-//数字
+// 数字
 uint8_t Key_Flag = 0;
 /****板载按键****/
 /*
@@ -747,7 +747,7 @@ int getKey()
 	if (Key_Flag == 0)
 	{
 		Key_Flag = 1;
-		pinMode(53, INPUT_PULLUP); //上拉输入
+		pinMode(53, INPUT_PULLUP); // 上拉输入
 	}
 	return digitalRead(53);
 }
@@ -783,12 +783,12 @@ int getTrackingPin(uint8_t pin)
 }
 
 /****RGB全彩灯****/
-uint8_t RGBFlag = 0; //内置RGB初始化标志位
+uint8_t RGBFlag = 0; // 内置RGB初始化标志位
 
 /*
  * color: 红绿蓝 黄紫青 白黑
  */
-void setRGB(uint8_t color) //内置
+void setRGB(uint8_t color) // 内置
 {
 	uint8_t red;
 	uint8_t blue;
@@ -807,44 +807,44 @@ void setRGB(uint8_t color) //内置
 		red = LOW;
 		green = HIGH;
 		blue = HIGH;
-		break; //红
+		break; // 红
 	case 1:
 		red = HIGH;
 		green = LOW;
 		blue = HIGH;
-		break; //绿
+		break; // 绿
 	case 2:
 		red = HIGH;
 		green = HIGH;
 		blue = LOW;
-		break; //蓝
+		break; // 蓝
 
 	case 3:
 		red = LOW;
 		green = LOW;
 		blue = HIGH;
-		break; //黄
+		break; // 黄
 	case 4:
 		red = LOW;
 		green = HIGH;
 		blue = LOW;
-		break; //紫
+		break; // 紫
 	case 5:
 		red = HIGH;
 		green = LOW;
 		blue = LOW;
-		break; //青
+		break; // 青
 
 	case 6:
 		red = LOW;
 		green = LOW;
 		blue = LOW;
-		break; //白
+		break; // 白
 	case 7:
 		red = HIGH;
 		green = HIGH;
 		blue = HIGH;
-		break; //黑
+		break; // 黑
 	default:
 		break;
 	}
@@ -853,12 +853,12 @@ void setRGB(uint8_t color) //内置
 	digitalWrite(49, red);
 }
 
-uint8_t RGBPinFlag = 0; //外置RGB初始化标志位
+uint8_t RGBPinFlag = 0; // 外置RGB初始化标志位
 /*
  * R_pin/G_pin/B_pin： DIGITAL端口
  * color: 红绿蓝 黄紫青 白黑
  */
-void setRGBPin(uint8_t R_pin, uint8_t G_pin, uint8_t B_pin, uint8_t color) //外置
+void setRGBPin(uint8_t R_pin, uint8_t G_pin, uint8_t B_pin, uint8_t color) // 外置
 {
 	uint8_t red;
 	uint8_t blue;
@@ -877,94 +877,94 @@ void setRGBPin(uint8_t R_pin, uint8_t G_pin, uint8_t B_pin, uint8_t color) //外
 		red = HIGH;
 		green = LOW;
 		blue = LOW;
-		break; //红
+		break; // 红
 	case 1:
 		red = LOW;
 		green = HIGH;
 		blue = LOW;
-		break; //绿
+		break; // 绿
 	case 2:
 		red = LOW;
 		green = LOW;
 		blue = HIGH;
-		break; //蓝
+		break; // 蓝
 
 	case 3:
 		red = HIGH;
 		green = HIGH;
 		blue = LOW;
-		break; //黄
+		break; // 黄
 	case 4:
 		red = HIGH;
 		green = LOW;
 		blue = HIGH;
-		break; //紫
+		break; // 紫
 	case 5:
 		red = LOW;
 		green = HIGH;
 		blue = HIGH;
-		break; //青
+		break; // 青
 
 	case 6:
 		red = HIGH;
 		green = HIGH;
 		blue = HIGH;
-		break; //白
+		break; // 白
 	case 7:
 		red = LOW;
 		green = LOW;
 		blue = LOW;
-		break; //黑
+		break; // 黑
 	default:
 		break;
 	}
-	digitalWrite(B_pin, blue);	//蓝
-	digitalWrite(G_pin, green); //绿
-	digitalWrite(R_pin, red);	//红
+	digitalWrite(B_pin, blue);	// 蓝
+	digitalWrite(G_pin, green); // 绿
+	digitalWrite(R_pin, red);	// 红
 }
-//--------------------------------------------SK6812
+// --------------------------------------------SK6812
 
 /****DHT11温湿度****/
 /*
  * pin：DIGITAL端口
  * command:    
- **TEMPERATURE  0	//湿度
- **CELSIUS		1	//摄氏度
- **FAHRENHEIT	2	//华氏度
- **SUM			3	//总和=湿度+摄氏度
+ **TEMPERATURE  0	// 湿度
+ **CELSIUS		1	// 摄氏度
+ **FAHRENHEIT	2	// 华氏度
+ **SUM			3	// 总和=湿度+摄氏度
  */
 int getDHT11Pin(uint8_t pin, uint8_t command)
 {
-	int temp;						//温度
-	int humi;						//湿度
-	int sum;						//校对码=湿度+温度
-	int chr[40] = {0};				//创建数字数组，用来存放40个bit
-	unsigned int loopCnt, _loopCnt; //响应时间
-	unsigned long time;				//收集数据时间
+	int temp;						// 温度
+	int humi;						// 湿度
+	int sum;						// 校对码=湿度+温度
+	int chr[40] = {0};				// 创建数字数组，用来存放40个bit
+	unsigned int loopCnt, _loopCnt; // 响应时间
+	unsigned long time;				// 收集数据时间
 
-	setDelay_ms(700);		  //采样时间
-	setDigitalPin(pin, LOW);  //输出模式--低电平
-	setDelay_ms(20);		  //输出低电平20ms（>18ms）
-	setDigitalPin(pin, HIGH); //输出模式--高电平
-	setDelay_us(40);		  //输出高电平40μs
-	setDigitalPin(pin, LOW);  //输出模式--低电平
-	pinMode(pin, INPUT);	  //输入模式
+	setDelay_ms(700);		  // 采样时间
+	setDigitalPin(pin, LOW);  // 输出模式--低电平
+	setDelay_ms(20);		  // 输出低电平20ms（>18ms）
+	setDigitalPin(pin, HIGH); // 输出模式--高电平
+	setDelay_us(40);		  // 输出高电平40μs
+	setDigitalPin(pin, LOW);  // 输出模式--低电平
+	pinMode(pin, INPUT);	  // 输入模式
 
-	loopCnt = getSystemTime_us(); //低电平响应信号
+	loopCnt = getSystemTime_us(); // 低电平响应信号
 	_loopCnt = loopCnt;
 	while (getDigitalPin(pin) != HIGH)
 	{
-		if (loopCnt++ == _loopCnt + 80) //80us
+		if (loopCnt++ == _loopCnt + 80) // 80us
 			break;
 	}
-	loopCnt = getSystemTime_us(); //高电平响应信号
+	loopCnt = getSystemTime_us(); // 高电平响应信号
 	_loopCnt = loopCnt;
 	while (getDigitalPin(pin) != LOW)
 	{
-		if (loopCnt++ == _loopCnt + 80) //80us
+		if (loopCnt++ == _loopCnt + 80) // 80us
 			break;
 	}
-	for (int i = 0; i < 40; i++) //开始读取bit1-40的数值
+	for (int i = 0; i < 40; i++) // 开始读取bit1-40的数值
 	{
 		/*
 		 *当出现高电平时，记下时间“time”
@@ -988,38 +988,38 @@ int getDHT11Pin(uint8_t pin, uint8_t command)
 	}
 
 	/*8位的bit转换为十进制*/
-	//湿度
+	// 湿度
 	humi = chr[0] * 128 + chr[1] * 64 + chr[2] * 32 + chr[3] * 16 + chr[4] * 8 + chr[5] * 4 + chr[6] * 2 + chr[7];
-	//温度
+	// 温度
 	temp = chr[16] * 128 + chr[17] * 64 + chr[18] * 32 + chr[19] * 16 + chr[20] * 8 + chr[21] * 4 + chr[22] * 2 + chr[23];
-	//校对码总和
+	// 校对码总和
 	sum = chr[32] * 128 + chr[33] * 64 + chr[34] * 32 + chr[35] * 16 + chr[36] * 8 + chr[37] * 4 + chr[38] * 2 + chr[39];
 
 	switch (command)
 	{
 	case 0:
 		return humi;
-		break; //湿度
+		break; // 湿度
 
 	case 1:
 		return temp;
-		break; //摄氏
+		break; // 摄氏
 
 	case 2:
 		temp = (1.8 * temp + 32.0);
 		return temp;
-		break; //华氏
+		break; // 华氏
 
 	case 3:
 		return sum;
-		break; //总和
+		break; // 总和
 
 	default:
 		return 999;
 		break;
 	}
 }
-//红外接收头-NEC
+// 红外接收头-NEC
 /*
  * pin： DIGITAL端口
  */
@@ -1032,25 +1032,25 @@ int getIRPin(uint8_t pin)
 	int data1, data2;
 	static int data;
 
-	if (getDigitalPin(pin) == LOW) //NEC协议
+	if (getDigitalPin(pin) == LOW) // NEC协议
 	{
 		while (getDigitalPin(pin) == LOW)
-			; //9ms
+			; // 9ms
 		time = getSystemTime_us();
-		while (getDigitalPin(pin) == HIGH) //4.5ms
+		while (getDigitalPin(pin) == HIGH) // 4.5ms
 		{
 			if ((getSystemTime_us() - time > 3000))
-				flag = 1; //标准码
+				flag = 1; // 标准码
 			else
-				flag = 0; //重复码
+				flag = 0; // 重复码
 		}
 
 		switch (flag)
 		{
 		case 0:
 			while (getDigitalPin(pin) == LOW)
-				;							   //0.5ms
-			while (getDigitalPin(pin) == HIGH) //>96.6ms
+				;							   // 0.5ms
+			while (getDigitalPin(pin) == HIGH) // >96.6ms
 			{
 				break;
 			}
@@ -1060,11 +1060,11 @@ int getIRPin(uint8_t pin)
 			for (int i = 0; i < 33; i++)
 			{
 				while (getDigitalPin(pin) == LOW)
-					; //0.5ms
+					; // 0.5ms
 				time = getSystemTime_us();
-				while (getDigitalPin(pin) == HIGH) //1.6ms
+				while (getDigitalPin(pin) == HIGH) // 1.6ms
 				{
-					if (getSystemTime_us() - time > 2000) //停止位40ms
+					if (getSystemTime_us() - time > 2000) // 停止位40ms
 						break;
 				}
 				if (getSystemTime_us() - time > 1600)
@@ -1077,7 +1077,7 @@ int getIRPin(uint8_t pin)
 			data1 = chr[16] + chr[17] * 2 + chr[18] * 4 + chr[19] * 8 + chr[20] * 16 + chr[21] * 32 + chr[22] * 64 + chr[23] * 128;
 			data2 = chr[24] + chr[25] * 2 + chr[26] * 4 + chr[27] * 8 + chr[28] * 16 + chr[29] * 32 + chr[30] * 64 + chr[31] * 128;
 
-			data = data1; //选择输出
+			data = data1; // 选择输出
 			return data;
 			break;
 		default:
@@ -1088,7 +1088,7 @@ int getIRPin(uint8_t pin)
 		return 999;
 }
 
-//模拟
+// 模拟
 /****按键****/
 /*
  * pin：ANALOG端口
@@ -1151,11 +1151,11 @@ int getPhotosensitivePin(uint8_t pin)
 /*
  * pin：ANALOG端口
  */
-int getSound() //内置
+int getSound() // 内置
 {
 	return getAnalogPin(A0);
 }
-int getSoundPin(uint8_t pin) //外置
+int getSoundPin(uint8_t pin) // 外置
 {
 	return getAnalogPin(pin);
 }
@@ -1187,40 +1187,40 @@ int getSliderPin(uint8_t pin)
 	return getAnalogPin(pin);
 }
 
-//PWM
+// PWM
 /****舵机****/
 /*
  *	pin：	4-8/44-46/13
  *	angle:	0-180°
  */
 Servo _servo[9];
-uint8_t ServoAngleFlag[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};				  //舵机初始化标志位
-int ServoAngleRecord[9] = {360, 360, 360, 360, 360, 360, 360, 360, 360};  //角度记录
-int ServoAngleRecord2[9] = {360, 360, 360, 360, 360, 360, 360, 360, 360}; //角度记录
-//***********************************************************************
+uint8_t ServoAngleFlag[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};				  // 舵机初始化标志位
+int ServoAngleRecord[9] = {360, 360, 360, 360, 360, 360, 360, 360, 360};  // 角度记录
+int ServoAngleRecord2[9] = {360, 360, 360, 360, 360, 360, 360, 360, 360}; // 角度记录
+// ***********************************************************************
 
 void servo(int servoPin, int angle)
-{ //定义一个脉冲函数
-	//发送50个脉冲
+{ // 定义一个脉冲函数
+	// 发送50个脉冲
 	angle = angle > 180 ? 180 : angle;
 	angle = angle < 0 ? 0 : angle;
 	//   if(ServoAngleRecord2[servoPin-4]==angle) return ;
 
 	for (int i = 0; i < 10; i++)
 	{
-		int pulsewidth = (angle * 11) + 500; //将角度转化为500-2480的脉宽值
-		digitalWrite(servoPin, HIGH);		 //将舵机接口电平至高
-		delayMicroseconds(pulsewidth);		 //延时脉宽值的微秒数
-		digitalWrite(servoPin, LOW);		 //将舵机接口电平至低
+		int pulsewidth = (angle * 11) + 500; // 将角度转化为 500-2480 的脉宽值
+		digitalWrite(servoPin, HIGH);		 // 将舵机接口调至高电平
+		delayMicroseconds(pulsewidth);		 // 延时脉宽值 (微秒)
+		digitalWrite(servoPin, LOW);		 // 将舵机接口调至低电平
 		delayMicroseconds(20000 - pulsewidth);
 	}
 	ServoAngleRecord2[servoPin - 4] = angle;
 }
 void setServoPin(uint8_t pin, uint8_t angle)
 {
-	if (pin > 3 && pin < 9) //舵机PWM输出4-8
+	if (pin > 3 && pin < 9) // 舵机PWM输出 4-8
 	{
-		if (ServoAngleFlag[pin - 4] == 0) //初始化
+		if (ServoAngleFlag[pin - 4] == 0) // 初始化
 		{
 			ServoAngleFlag[pin - 4] = 1;
 			_servo[pin - 4].attach(pin);
@@ -1231,12 +1231,12 @@ void setServoPin(uint8_t pin, uint8_t angle)
 			angle = 0;
 		if (ServoAngleRecord[pin - 4] == angle)
 			return;
-		_servo[pin - 4].write(angle); //0-180°
+		_servo[pin - 4].write(angle); // 0-180°
 		ServoAngleRecord[pin - 4] = angle;
 	}
-	else if (pin > 43 && pin < 47) //舵机PWM输出44-46
+	else if (pin > 43 && pin < 47) // 舵机PWM输出44-46
 	{
-		if (ServoAngleFlag[pin - 39] == 0) //初始化
+		if (ServoAngleFlag[pin - 39] == 0) // 初始化
 		{
 			ServoAngleFlag[pin - 39] = 1;
 			_servo[pin - 39].attach(pin);
@@ -1247,12 +1247,12 @@ void setServoPin(uint8_t pin, uint8_t angle)
 			angle = 0;
 		if (ServoAngleRecord[pin - 39] == angle)
 			return;
-		_servo[pin - 39].write(angle); //0-180°
+		_servo[pin - 39].write(angle); // 0-180°
 		ServoAngleRecord[pin - 39] = angle;
 	}
-	else if (pin == 13) //舵机PWM输出13
+	else if (pin == 13) // 舵机PWM输出13
 	{
-		if (ServoAngleFlag[pin - 5] == 0) //初始化
+		if (ServoAngleFlag[pin - 5] == 0) // 初始化
 		{
 			ServoAngleFlag[pin - 5] = 1;
 			_servo[pin - 5].attach(pin);
@@ -1263,7 +1263,7 @@ void setServoPin(uint8_t pin, uint8_t angle)
 			angle = 0;
 		if (ServoAngleRecord[pin - 5] == angle)
 			return;
-		_servo[pin - 5].write(angle); //0-180°
+		_servo[pin - 5].write(angle); // 0-180°
 		ServoAngleRecord[pin - 5] = angle;
 	}
 	else
@@ -1280,7 +1280,7 @@ int tonePin = 9;
  *	规律就是时间上单个音符没有下划线，就是一拍（1），有下划线是半拍（0.5），两个下划线是四分之一拍（0.25），
  *	有“—”=前面音符的拍子+1；频率上就是按照音符是否带点，点在上还是在下到表中查找就可以了。
  */
-//葫芦娃音乐
+// 葫芦娃音乐
 int tune[] =
 	{
 		TONE_DH1, TONE_D6, TONE_D5, TONE_D6, TONE_0, TONE_DH1, TONE_D6, TONE_D5, TONE_DH1, TONE_D6, TONE_0, TONE_D6,
@@ -1291,7 +1291,7 @@ int tune[] =
 		TONE_D6, TONE_D6, TONE_0, TONE_D5, TONE_D1, TONE_D3, TONE_0, TONE_DH1, TONE_0, TONE_D6, TONE_D6, TONE_D5,
 		TONE_D5, TONE_D6, TONE_D6, TONE_0, TONE_D5, TONE_D1, TONE_D2, TONE_0, TONE_D3, TONE_D3, TONE_D1, TONE_DL6,
 		TONE_D1, TONE_D3, TONE_D5, TONE_D6, TONE_D6, TONE_D3, TONE_D5, TONE_D6, TONE_D6, TONE_DH1, TONE_0, TONE_D7,
-		TONE_D5, TONE_D6}; //这部分就是整首曲子的音符部分
+		TONE_D5, TONE_D6}; // 这部分就是整首曲子的音符部分
 
 float duration[] =
 	{
@@ -1305,22 +1305,22 @@ float duration[] =
 		0.5, 0.5, 0.5 + 0.25, 0.25, 0.5 + 0.25, 0.25, 0.5 + 0.25, 0.25,
 		0.5, 1, 0.5, 1, 1, 1 + 1, 0.5, 0.5, 1, 1 + 1 + 1 + 1,
 		0.5, 1, 0.5, 1 + 1, 0.5, 1, 0.5, 1 + 1, 1 + 1, 0.5, 0.5, 1,
-		1 + 1 + 1 + 1}; //这部分是整首曲子的节拍部分
+		1 + 1 + 1 + 1}; // 这部分是整首曲子的节拍部分
 
-int length; //这里定义一个变量，后面用来表示共有多少个音符
+int length; // 这里定义一个变量，后面用来表示共有多少个音符
 
 /****默认音乐输出****/
 void setMusic()
 {
 
-	pinMode(tonePin, OUTPUT); //设置蜂鸣器的pin为输出模式
+	pinMode(tonePin, OUTPUT); // 设置蜂鸣器的pin为输出模式
 
-	length = sizeof(tune) / sizeof(tune[0]); //这里用sizeof，可以查出tone序列里有多少个音符
-	for (int x = 0; x < length; x++)		 //循环音符的次数
+	length = sizeof(tune) / sizeof(tune[0]); // 这里用sizeof，可以查出tone序列里有多少个音符
+	for (int i = 0; i < length; i++)		 // 循环音符的次数
 	{
-		tone(tonePin, tune[x]);	  //此函数依次播放tune序列里的数组，即每个音符
-		delay(400 * duration[x]); //每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
-		noTone(tonePin);		  //停止当前音符，进入下一音符
+		tone(tonePin, tune[i]);	  // 此函数依次播放tune序列里的数组，即每个音符
+		delay(400 * duration[i]); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+		noTone(tonePin);		  // 停止当前音符，进入下一音符
 	}
 }
 
@@ -1331,14 +1331,14 @@ void setMusic()
  */
 void setMusicOUT(int _tune[], float _duration[])
 {
-	// pinMode(tonePin,OUTPUT);//设置蜂鸣器的pin为输出模式
+	// pinMode(tonePin,OUTPUT);// 设置蜂鸣器的pin为输出模式
 
-	// length = sizeof(_tune)/sizeof(_tune[0]);//这里用sizeof，可以查出tone序列里有多少个音符
-	// for(int x=0; x<length; x++)//循环音符的次数
+	// length = sizeof(_tune)/sizeof(_tune[0]);// 这里用sizeof，可以查出tone序列里有多少个音符
+	// for(int x=0; x<length; x++)// 循环音符的次数
 	// {
-	// 	tone(tonePin,_tune[x]);//此函数依次播放tune序列里的数组，即每个音符
-	// 	delay(400*_duration[x]);//每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
-	// 	noTone(tonePin);//停止当前音符，进入下一音符
+	// 	tone(tonePin,_tune[x]);// 此函数依次播放tune序列里的数组，即每个音符
+	// 	delay(400*_duration[x]);// 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+	// 	noTone(tonePin);// 停止当前音符，进入下一音符
 	// }
 }
 /*
@@ -1347,19 +1347,19 @@ void setMusicOUT(int _tune[], float _duration[])
  */
 void setMusicOUT(int _tune, float _duration)
 {
-	pinMode(tonePin, OUTPUT); //设置蜂鸣器的pin为输出模式
+	pinMode(tonePin, OUTPUT); // 设置蜂鸣器的pin为输出模式
 
-	tone(tonePin, _tune);	//此函数依次播放tune序列里的数组，即每个音符
-	delay(400 * _duration); //每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
-	noTone(tonePin);		//停止当前音符，进入下一音符
+	tone(tonePin, _tune);	// 此函数依次播放tune序列里的数组，即每个音符
+	delay(400 * _duration); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+	noTone(tonePin);		// 停止当前音符，进入下一音符
 }
 
 /****Beep蜂鸣器****/
 /*
  * turn：ON/OFF
  */
-uint8_t BeepFlag = 0;	   //内置蜂鸣器初始化标志位
-void setBeep(uint8_t turn) //内置
+uint8_t BeepFlag = 0;	   // 内置蜂鸣器初始化标志位
+void setBeep(uint8_t turn) // 内置
 {
 	if (BeepFlag == 0)
 	{
@@ -1380,8 +1380,8 @@ void setBeep(uint8_t turn) //内置
  * pin：PWM端口
  * turn：ON/OFF
  */
-uint8_t BeepPinFlag = 0;				   //外置蜂鸣器初始化标志位
-void setBeepPin(uint8_t pin, uint8_t turn) //外置
+uint8_t BeepPinFlag = 0;				   // 外置蜂鸣器初始化标志位
+void setBeepPin(uint8_t pin, uint8_t turn) // 外置
 {
 	if (BeepPinFlag == 0)
 	{
@@ -1398,12 +1398,12 @@ void setBeepPin(uint8_t pin, uint8_t turn) //外置
 	}
 }
 
-//软IIC
+// 软IIC
 /****超声波****/
 /*
  * pin: I1-I3
  */
-uint16_t getUltrasoundPin(uint8_t pin) //输入
+uint16_t getUltrasoundPin(uint8_t pin) // 输入
 {
 	set_I2C_Init(pin);
 
@@ -1417,13 +1417,13 @@ uint16_t getUltrasoundPin(uint8_t pin) //输入
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(_ULTRASOUND_ADDR_ + 1);
-	cmd = Soft_I2C_Read(0);	  //数据开头
-	datah = Soft_I2C_Read(0); //数据高八位
-	datal = Soft_I2C_Read(0); //数据低八位
-	s = Soft_I2C_Read(1);	  //检验和
+	cmd = Soft_I2C_Read(0);	  // 数据开头
+	datah = Soft_I2C_Read(0); // 数据高八位
+	datal = Soft_I2C_Read(0); // 数据低八位
+	s = Soft_I2C_Read(1);	  // 检验和
 	Soft_I2C_Stop();
 
-	SUM = (uint8_t)(cmd + datah + datal); //校验
+	SUM = (uint8_t)(cmd + datah + datal); // 校验
 
 	if (SUM != s)
 	{
@@ -1458,7 +1458,7 @@ uint16_t getUltrasoundPin(uint8_t pin) //输入
  *		55 关闭黑白阈值模式
  * 	parameter: 设置颜色传感器参数，命令34-37，39，46-53才会用到
  */
-void setColorSensorPin(uint8_t pin, uint8_t cmd, int parameter) //输出
+void setColorSensorPin(uint8_t pin, uint8_t cmd, int parameter) // 输出
 {
 	set_I2C_Init(pin);
 
@@ -1471,10 +1471,10 @@ void setColorSensorPin(uint8_t pin, uint8_t cmd, int parameter) //输出
 
 	if (cmd == 40 || cmd == 41)
 		return;
-	//从机地址为10Bite 0xf6xx:高2位固定为11,低八位为0x50~0x57,即实际使用的地址为0x350~0x357(0xf650~0xf657)
+	// 从机地址为10Bite 0xf6xx:高2位固定为11,低八位为0x50~0x57,即实际使用的地址为0x350~0x357(0xf650~0xf657)
 
 	Soft_I2C_Start();
-	Soft_I2C_Write(0xf6); //写临时地址
+	Soft_I2C_Write(0xf6); // 写临时地址
 	Soft_I2C_Write(addr);
 	Soft_I2C_Write(0xEA);
 	Soft_I2C_Write(cmd);
@@ -1508,7 +1508,7 @@ void setColorSensorPin(uint8_t pin, uint8_t cmd, int parameter) //输出
  *		67 白色参考值
  *		68 黑色参考值
  */
-uint32_t getColorSensorPin(uint8_t pin, uint8_t cmd) //输入
+uint32_t getColorSensorPin(uint8_t pin, uint8_t cmd) // 输入
 {
 	set_I2C_Init(pin);
 
@@ -1522,18 +1522,18 @@ uint32_t getColorSensorPin(uint8_t pin, uint8_t cmd) //输入
 	uint8_t addrh, addrl;
 	uint8_t addr;
 
-	addr = id + 0x50 - 1; //0xf650~0xf657
+	addr = id + 0x50 - 1; // 0xf650~0xf657
 
 	Soft_I2C_Start();
-	Soft_I2C_Write(0xf6); //SlaveAddrH
-	Soft_I2C_Write(addr); //SlaveAddrL
+	Soft_I2C_Write(0xf6); // SlaveAddrH
+	Soft_I2C_Write(addr); // SlaveAddrL
 	Soft_I2C_Write(0xFA);
 	Soft_I2C_Write(cmd);
 
 	if ((cmd < 20 && cmd > 0) || (cmd > 60 && cmd <= 74) || ((cmd >= 254) && (cmd <= 255)))
 	{
-		Soft_I2C_Start();	  //重复起始位
-		Soft_I2C_Write(0xf7); //SlaveAddr|0x01
+		Soft_I2C_Start();	  // 重复起始位
+		Soft_I2C_Write(0xf7); // SlaveAddr|0x01
 		first = Soft_I2C_Read(0);
 		m_id = Soft_I2C_Read(0);
 		m_val1 = Soft_I2C_Read(0);
@@ -1552,8 +1552,8 @@ uint32_t getColorSensorPin(uint8_t pin, uint8_t cmd) //输入
 		end = Soft_I2C_Read(1);
 	}
 
-	Soft_I2C_Stop();					   //停止位
-	sum = m_id + m_val1 + m_val2 + m_val3; //校验和计算
+	Soft_I2C_Stop();					   // 停止位
+	sum = m_id + m_val1 + m_val2 + m_val3; // 校验和计算
 
 	if (first == 0xEA && sum == end && m_id == addr)
 	{
@@ -1576,7 +1576,7 @@ void setAHRSPin(uint8_t pin, uint8_t command)
 	set_I2C_Init(pin);
 
 	Soft_I2C_Start();
-	Soft_I2C_Write(0x3a); //addr
+	Soft_I2C_Write(0x3a); // addr
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
 	Soft_I2C_Write(command);
@@ -1594,11 +1594,11 @@ uint8_t g_AhrsRecBufCnt[8];
 uint8_t g_AhrsFistRxFlag[8];
 uint8_t g_LastCmdList[8][9];
 
-short int getAHRSRecBuf(uint8_t pin, uint8_t cnt) //数据已经读出则返回8888
+short int getAHRSRecBuf(uint8_t pin, uint8_t cnt) // 数据已经读出则返回8888
 {
 	short int buf;
 	if (cnt > 8)
-		return 9999; //cnt=9-1
+		return 9999; // cnt=9-1
 	buf = g_AhrsRecBuf[pin][cnt];
 	g_AhrsRecBuf[pin][cnt] = 8888;
 	if (buf != 8888)
@@ -1606,7 +1606,7 @@ short int getAHRSRecBuf(uint8_t pin, uint8_t cnt) //数据已经读出则返回8
 		g_AhrsRecBufCnt[pin]++;
 		g_LastCmdList[pin][cnt] = 1;
 	}
-	if (g_AhrsRecBufCnt[pin] > 8) //已经将缓存全部读出
+	if (g_AhrsRecBufCnt[pin] > 8) // 已经将缓存全部读出
 	{
 		g_AhrsRecBufCnt[pin] = 0;
 		g_AhrsFistRxFlag[pin] = 0;
@@ -1625,25 +1625,25 @@ short int getAHRSPin(uint8_t pin, uint8_t command1, uint8_t command2)
 	uint8_t ACK = 0;
 	short int m_data;
 	uint8_t m_AhrsRecBufList[22];
-	uint8_t m_Rxflag = 0; //接收一次命令
+	uint8_t m_Rxflag = 0; // 接收一次命令
 	uint8_t whichx = pin - 1;
 
 	set_I2C_Init(pin);
 
 	if (g_AhrsFistRxFlag[whichx] == 0 || command2 || g_LastCmdList[whichx][command1 - 1])
 	{
-		m_Rxflag = 1; //接收一次缓存
+		m_Rxflag = 1; // 接收一次缓存
 		if (command2 == 0)
 			g_AhrsFistRxFlag[whichx] = 1;
 		else
 			g_AhrsFistRxFlag[whichx] = 0;
 		for (i = 0; i < 9; i++)
 		{
-			g_LastCmdList[whichx][i] = 0; //清零
+			g_LastCmdList[whichx][i] = 0; // 清零
 		}
 
 		Soft_I2C_Start();
-		Soft_I2C_Write(0x3b); //addr
+		Soft_I2C_Write(0x3b); // addr
 
 		for (i = 0; i < 22; i++)
 		{
@@ -1656,34 +1656,34 @@ short int getAHRSPin(uint8_t pin, uint8_t command1, uint8_t command2)
 
 		Soft_I2C_Stop();
 	}
-	//OS_EXIT_CRITICAL();
-	if (m_Rxflag) //接收一次数据
+	// OS_EXIT_CRITICAL();
+	if (m_Rxflag) // 接收一次数据
 	{
 		g_AhrsRecBufCnt[whichx] = 0;
-		if (m_AhrsRecBufList[0] == 0xaa && m_AhrsRecBufList[1] == 0x55 && m_AhrsRecBufList[21] == 0xcf) //正确数据包
+		if (m_AhrsRecBufList[0] == 0xaa && m_AhrsRecBufList[1] == 0x55 && m_AhrsRecBufList[21] == 0xcf) // 正确数据包
 		{
 			g_AhrsFistRxFlag[whichx] = 2;
-			g_AhrsRecBuf[whichx][0] = (short int)(m_AhrsRecBufList[2]) | ((char)m_AhrsRecBufList[3] << 8);	 //roll//横滚角 degree（放大10倍）
-			g_AhrsRecBuf[whichx][1] = (short int)(m_AhrsRecBufList[4]) | ((char)m_AhrsRecBufList[5] << 8);	 //pitch//仰俯角 degree（放大10倍）
-			g_AhrsRecBuf[whichx][2] = (short int)(m_AhrsRecBufList[6]) | ((char)m_AhrsRecBufList[7] << 8);	 //yaw//偏航角 degree（放大10倍）
-			g_AhrsRecBuf[whichx][3] = (short int)(m_AhrsRecBufList[8]) | ((char)m_AhrsRecBufList[9] << 8);	 //ax//加速度X g（放大100倍）
-			g_AhrsRecBuf[whichx][4] = (short int)(m_AhrsRecBufList[10]) | ((char)m_AhrsRecBufList[11] << 8); //ay//加速度Y g（放大100倍）
-			g_AhrsRecBuf[whichx][5] = (short int)(m_AhrsRecBufList[12]) | ((char)m_AhrsRecBufList[13] << 8); //az//加速度Z g（放大100倍）
-			g_AhrsRecBuf[whichx][6] = (short int)(m_AhrsRecBufList[14]) | ((char)m_AhrsRecBufList[15] << 8); //gx//陀螺仪X  dps（放大100倍）
-			g_AhrsRecBuf[whichx][7] = (short int)(m_AhrsRecBufList[16]) | ((char)m_AhrsRecBufList[17] << 8); //gy//陀螺仪Y  dps（放大100倍）
-			g_AhrsRecBuf[whichx][8] = (short int)(m_AhrsRecBufList[18]) | ((char)m_AhrsRecBufList[19] << 8); //gz//陀螺仪Z  dps（放大100倍）
+			g_AhrsRecBuf[whichx][0] = (short int)(m_AhrsRecBufList[2]) | ((char)m_AhrsRecBufList[3] << 8);	 // roll// 横滚角 degree（放大10倍）
+			g_AhrsRecBuf[whichx][1] = (short int)(m_AhrsRecBufList[4]) | ((char)m_AhrsRecBufList[5] << 8);	 // pitch// 仰俯角 degree（放大10倍）
+			g_AhrsRecBuf[whichx][2] = (short int)(m_AhrsRecBufList[6]) | ((char)m_AhrsRecBufList[7] << 8);	 // yaw// 偏航角 degree（放大10倍）
+			g_AhrsRecBuf[whichx][3] = (short int)(m_AhrsRecBufList[8]) | ((char)m_AhrsRecBufList[9] << 8);	 // ax// 加速度X g（放大100倍）
+			g_AhrsRecBuf[whichx][4] = (short int)(m_AhrsRecBufList[10]) | ((char)m_AhrsRecBufList[11] << 8); // ay// 加速度Y g（放大100倍）
+			g_AhrsRecBuf[whichx][5] = (short int)(m_AhrsRecBufList[12]) | ((char)m_AhrsRecBufList[13] << 8); // az// 加速度Z g（放大100倍）
+			g_AhrsRecBuf[whichx][6] = (short int)(m_AhrsRecBufList[14]) | ((char)m_AhrsRecBufList[15] << 8); // gx// 陀螺仪X  dps（放大100倍）
+			g_AhrsRecBuf[whichx][7] = (short int)(m_AhrsRecBufList[16]) | ((char)m_AhrsRecBufList[17] << 8); // gy// 陀螺仪Y  dps（放大100倍）
+			g_AhrsRecBuf[whichx][8] = (short int)(m_AhrsRecBufList[18]) | ((char)m_AhrsRecBufList[19] << 8); // gz// 陀螺仪Z  dps（放大100倍）
 		}
 		else
 		{
 			g_AhrsFistRxFlag[whichx] = 0;
-			return 9999; //接收到非数据包
+			return 9999; // 接收到非数据包
 		}
 		m_AhrsRecBufList[0] = 0;
 		m_AhrsRecBufList[1] = 0;
 		m_AhrsRecBufList[21] = 0;
 	}
 	if (g_AhrsFistRxFlag[whichx] == 2)
-		m_data = getAHRSRecBuf(whichx, command1 - 1); //command1=1~9
+		m_data = getAHRSRecBuf(whichx, command1 - 1); // command1=1~9
 	else
 		m_data = 9999;
 
@@ -1713,19 +1713,19 @@ int getJoystickCmdPin(uint8_t pin, uint8_t command)
 	m_temp = Soft_I2C_Read(1);
 	Soft_I2C_Stop();
 
-	if (m_fix == 0) //X轴
+	if (m_fix == 0) // X轴
 	{
 		if (m_temp <= 92)
-			return m_temp - 100; //左
+			return m_temp - 100; // 左
 		else if (m_temp >= 108)
 			return ~(100 - m_temp) + 1;
 		else
 			return 0;
 	}
-	else if (m_fix == 1) //Y轴
+	else if (m_fix == 1) // Y轴
 	{
 		if (m_temp <= 92)
-			return 100 - m_temp; //上
+			return 100 - m_temp; // 上
 		else if (m_temp >= 108)
 			return ~(m_temp - 100) + 1;
 		else
@@ -1734,7 +1734,7 @@ int getJoystickCmdPin(uint8_t pin, uint8_t command)
 	else if (m_fix == 2)
 	{
 		if (m_temp == 0xAB)
-			return 1; //按键
+			return 1; // 按键
 		else
 			return 0;
 	}
@@ -1744,7 +1744,7 @@ int getJoystickCmdPin(uint8_t pin, uint8_t command)
 	}
 }
 /****2.4G_遥控****/
-//通讯密码设置
+// 通讯密码设置
 /*
  * pin：I1-I3
  * password：123456
@@ -1787,7 +1787,7 @@ void setRFPassWordPin(uint8_t pin, uint32_t password)
 	Soft_I2C_Stop();
 }
 
-//通讯接收数据
+// 通讯接收数据
 /*
  * pin：I1-I3
  */
@@ -1804,7 +1804,7 @@ uint16_t getRFModuleBytePin(uint8_t pin)
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x05); //命令,查询接收缓冲
+	Soft_I2C_Write(0x05); // 命令,查询接收缓冲
 	check_sum += 0x05;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -1815,13 +1815,13 @@ uint16_t getRFModuleBytePin(uint8_t pin)
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
-	for (n = 0; n < 15; n++) //一次要读取完所有缓冲数据
+	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);
 	}
 	rf_data[15] = Soft_I2C_Read(1);
 	Soft_I2C_Stop();
-	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x11 && rf_data[15] == 0xCF) //检验命令包
+	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x11 && rf_data[15] == 0xCF) // 检验命令包
 	{
 		data = rf_data[3];
 	}
@@ -1829,7 +1829,7 @@ uint16_t getRFModuleBytePin(uint8_t pin)
 	return data;
 }
 
-//通讯发送数据
+// 通讯发送数据
 /*
  * pin：I1-I3
  * data：变量/字符
@@ -1841,12 +1841,12 @@ uint8_t setRFModuleBytePin(uint8_t pin, uint8_t _data)
 
 	set_I2C_Init(pin);
 
-	//发射指令
+	// 发射指令
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x02); //命令,发射数据
+	Soft_I2C_Write(0x02); // 命令,发射数据
 	check_sum += 0x02;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -1854,12 +1854,12 @@ uint8_t setRFModuleBytePin(uint8_t pin, uint8_t _data)
 	check_sum += _data;
 	Soft_I2C_Write(check_sum);
 	Soft_I2C_Stop();
-	//设置查询的内容是哪种
+	// 设置查询的内容是哪种
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x04); //命令
+	Soft_I2C_Write(0x04); // 命令
 	check_sum += 0x04;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -1867,20 +1867,20 @@ uint8_t setRFModuleBytePin(uint8_t pin, uint8_t _data)
 	check_sum += 0x00;
 	Soft_I2C_Write(check_sum);
 	Soft_I2C_Stop();
-	//读取具体数据
+	// 读取具体数据
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
 	do
 	{
 		ok_flag = Soft_I2C_Read(0);
-	} while (ok_flag == 0x02); //不断查询，等待发射完毕
+	} while (ok_flag == 0x02); // 不断查询，等待发射完毕
 	ok_flag = Soft_I2C_Read(1);
 	Soft_I2C_Stop();
 
 	return (ok_flag);
 }
 
-//接收手柄键值
+// 接收手柄键值
 /*
  * pin：I1-I3
  */
@@ -1899,7 +1899,7 @@ uint16_t getRFModuleRemoteButtonPin(uint8_t pin)
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x05); //命令,查询接收缓冲
+	Soft_I2C_Write(0x05); // 命令,查询接收缓冲
 	check_sum += 0x05;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -1910,7 +1910,7 @@ uint16_t getRFModuleRemoteButtonPin(uint8_t pin)
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
-	for (n = 0; n < 15; n++) //一次要读取完所有缓冲数据
+	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);
 	}
@@ -1918,7 +1918,7 @@ uint16_t getRFModuleRemoteButtonPin(uint8_t pin)
 	Soft_I2C_Stop();
 
 	// data=rf_data[3];
-	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) //检验命令包
+	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) // 检验命令包
 	{
 		code = (uint32_t)rf_data[3] * 0x1000000 + (uint32_t)rf_data[4] * 0x10000 + (uint32_t)rf_data[5] * 0x100 + (uint32_t)rf_data[6];
 		for (n = 0; n < 20; n++)
@@ -1939,7 +1939,7 @@ uint16_t getRFModuleRemoteButtonPin(uint8_t pin)
 		return 999;
 }
 
-//接收手柄键码
+// 接收手柄键码
 /*
  * pin：I1-I3
  */
@@ -1957,7 +1957,7 @@ uint32_t getRFModuleRemoteCodePin(uint8_t pin)
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x05); //命令,查询接收缓冲
+	Soft_I2C_Write(0x05); // 命令,查询接收缓冲
 	check_sum += 0x05;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -1968,7 +1968,7 @@ uint32_t getRFModuleRemoteCodePin(uint8_t pin)
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
-	for (n = 0; n < 15; n++) //一次要读取完所有缓冲数据
+	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);
 	}
@@ -1976,7 +1976,7 @@ uint32_t getRFModuleRemoteCodePin(uint8_t pin)
 	Soft_I2C_Stop();
 
 	// data=rf_data[3];
-	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) //检验命令包
+	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) // 检验命令包
 	{
 		code = (uint32_t)rf_data[3] * 0x1000000 + (uint32_t)rf_data[4] * 0x10000 + (uint32_t)rf_data[5] * 0x100 + (uint32_t)rf_data[6];
 	}
@@ -1984,7 +1984,7 @@ uint32_t getRFModuleRemoteCodePin(uint8_t pin)
 	return code;
 }
 
-//接收手柄重力值
+// 接收手柄重力值
 /*
  * pin：I1-I3
  * axis: GravityX/GravityY/GravityZ
@@ -2002,7 +2002,7 @@ short int getRFModuleRemoteGravityPin(uint8_t pin, uint8_t axis)
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x05); //命令,查询接收缓冲
+	Soft_I2C_Write(0x05); // 命令,查询接收缓冲
 	check_sum += 0x05;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -2013,7 +2013,7 @@ short int getRFModuleRemoteGravityPin(uint8_t pin, uint8_t axis)
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
-	for (n = 0; n < 15; n++) //一次要读取完所有缓冲数据
+	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);
 	}
@@ -2021,7 +2021,7 @@ short int getRFModuleRemoteGravityPin(uint8_t pin, uint8_t axis)
 	Soft_I2C_Stop();
 
 	// data=rf_data[3];
-	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) //检验命令包
+	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) // 检验命令包
 	{
 		switch (axis)
 		{
@@ -2029,17 +2029,17 @@ short int getRFModuleRemoteGravityPin(uint8_t pin, uint8_t axis)
 		{
 			data = (char)rf_data[11];
 		}
-		break; //X
+		break; // X
 		case 0x02:
 		{
 			data = (char)rf_data[12];
 		}
-		break; //Y
+		break; // Y
 		case 0x03:
 		{
 			data = (char)rf_data[13];
 		}
-		break; //Z
+		break; // Z
 		default:
 		{
 			data = 999;
@@ -2050,7 +2050,7 @@ short int getRFModuleRemoteGravityPin(uint8_t pin, uint8_t axis)
 	return data;
 }
 
-//接收手柄摇杆值
+// 接收手柄摇杆值
 /*
  * pin：I1-I3
  * direction:ROCKER_LEFT/ROCKER_RIGHT
@@ -2069,7 +2069,7 @@ short int getRFModuleRemoteRockerPin(uint8_t pin, uint8_t direction, uint8_t axi
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x05); //命令,查询接收缓冲
+	Soft_I2C_Write(0x05); // 命令,查询接收缓冲
 	check_sum += 0x05;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -2080,7 +2080,7 @@ short int getRFModuleRemoteRockerPin(uint8_t pin, uint8_t direction, uint8_t axi
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
-	for (n = 0; n < 15; n++) //一次要读取完所有缓冲数据
+	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);
 	}
@@ -2088,7 +2088,7 @@ short int getRFModuleRemoteRockerPin(uint8_t pin, uint8_t direction, uint8_t axi
 	Soft_I2C_Stop();
 
 	// data=rf_data[3];
-	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) //检验命令包
+	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) // 检验命令包
 	{
 		if (direction == 0)
 		{
@@ -2098,12 +2098,12 @@ short int getRFModuleRemoteRockerPin(uint8_t pin, uint8_t direction, uint8_t axi
 			{
 				data = (char)rf_data[7];
 			}
-			break; //X
+			break; // X
 			case 1:
 			{
 				data = (char)rf_data[8];
 			}
-			break; //Y
+			break; // Y
 			default:
 			{
 				data = 999;
@@ -2118,12 +2118,12 @@ short int getRFModuleRemoteRockerPin(uint8_t pin, uint8_t direction, uint8_t axi
 			{
 				data = (char)rf_data[9];
 			}
-			break; //X
+			break; // X
 			case 1:
 			{
 				data = (char)rf_data[10];
 			}
-			break; //Y
+			break; // Y
 			default:
 			{
 				data = 999;
@@ -2134,110 +2134,110 @@ short int getRFModuleRemoteRockerPin(uint8_t pin, uint8_t direction, uint8_t axi
 	return data;
 }
 
-//串口(保留该程序-解码BC7210A)
+// 串口(保留该程序-解码BC7210A)
 /****红外接收****/
 /*
  * _uart：串口0-3
  */
 /*
 uint8_t uartData   = 0;
-uint8_t IRFlag[4] = {0,0,0,0};//串口初始化标志位
+uint8_t IRFlag[4] = {0,0,0,0};// 串口初始化标志位
 uint8_t getIRPin(uint8_t _uart)
 {	
-	if(IRFlag[_uart]==0)	//初始化
+	if(IRFlag[_uart]==0)	// 初始化
 	{
 		IRFlag[_uart]=1;
 		switch(_uart)
 		{
-			case uart0 ://RX-0 TX-1
-						Serial.begin(9600);	//开串口接收
-						UCSR0B &= 0xF3;     //禁止TX0
-						pinMode(1,INPUT_PULLUP);//设置IO输入且上拉电阻
+			case uart0 :// RX-0 TX-1
+						Serial.begin(9600);	// 开串口接收
+						UCSR0B &= 0xF3;     // 禁止TX0
+						pinMode(1,INPUT_PULLUP);// 设置IO输入且上拉电阻
 						break;
 						
-			case uart1 ://RX-19 TX-18 分别对应 编码m4 m3
-						Serial1.begin(9600);//开串口接收
-						UCSR1B &= 0xF3;     //禁止TX1
-						pinMode(41,INPUT_PULLUP);//设置IO输入且上拉电阻
+			case uart1 :// RX-19 TX-18 分别对应 编码m4 m3
+						Serial1.begin(9600);// 开串口接收
+						UCSR1B &= 0xF3;     // 禁止TX1
+						pinMode(41,INPUT_PULLUP);// 设置IO输入且上拉电阻
 						break;
 						
-			case uart2 ://RX-17 TX-16
-						Serial2.begin(9600);//开串口接收
-						UCSR2B &= 0xF3;     //禁止TX2
-						pinMode(16,INPUT_PULLUP);//设置IO输入且上拉电阻
+			case uart2 :// RX-17 TX-16
+						Serial2.begin(9600);// 开串口接收
+						UCSR2B &= 0xF3;     // 禁止TX2
+						pinMode(16,INPUT_PULLUP);// 设置IO输入且上拉电阻
 						break;
 						
-			case uart3 ://RX-15 TX-14
-						Serial3.begin(9600);//开串口接收
-						UCSR3B &= 0xF3;     //禁止TX3
-						pinMode(14,INPUT_PULLUP);//设置IO输入且上拉电阻
+			case uart3 :// RX-15 TX-14
+						Serial3.begin(9600);// 开串口接收
+						UCSR3B &= 0xF3;     // 禁止TX3
+						pinMode(14,INPUT_PULLUP);// 设置IO输入且上拉电阻
 						break;
 						
 			default : break;
 		}
 	}	
 	
-	switch(_uart)//接收数据
+	switch(_uart)// 接收数据
 	{
 		case uart0 :
-					if(Serial.available()>0)//检测接收数据
+					if(Serial.available()>0)// 检测接收数据
 					{             
-						uartData = int(Serial.read());//存储缓冲数值
+						uartData = int(Serial.read());// 存储缓冲数值
 						setDelay_ms(2);
 					}
 					break;
 
 		case uart1 :
-					if(Serial1.available()>0)//检测接收数据
+					if(Serial1.available()>0)// 检测接收数据
 					{             
-						uartData = int(Serial1.read());//存储缓冲数值
+						uartData = int(Serial1.read());// 存储缓冲数值
 						setDelay_ms(2);
 					}
 					break;
 
 		case uart2 :
-					if(Serial2.available()>0)//检测接收数据
+					if(Serial2.available()>0)// 检测接收数据
 					{             
-						uartData = int(Serial2.read());//存储缓冲数值
+						uartData = int(Serial2.read());// 存储缓冲数值
 						setDelay_ms(2);
 					}
 					break;
 
 		case uart3 :
-					if(Serial3.available()>0)//检测接收数据
+					if(Serial3.available()>0)// 检测接收数据
 					{             
-						uartData = int(Serial3.read());//存储缓冲数值
+						uartData = int(Serial3.read());// 存储缓冲数值
 						setDelay_ms(2);						
 					}
 					break;
 
 		default : break;		
 	}
-	switch(_uart)//不连续信号
+	switch(_uart)// 不连续信号
 	{
 		case uart0 :
-					if(getDigitalPin(1)==1)//检测不接收数据
+					if(getDigitalPin(1)==1)// 检测不接收数据
 					{             
 						return uartData=0;
 					}
 					break;
 
 		case uart1 :
-					if(getDigitalPin(41)==1)//检测不接收数据
+					if(getDigitalPin(41)==1)// 检测不接收数据
 					{             
 						return uartData=0;
 					}
 					break;
 
 		case uart2 :
-					if(getDigitalPin(16)==1)//检测不接收数据
+					if(getDigitalPin(16)==1)// 检测不接收数据
 					{             
 						return uartData=0;
 					}
 					break;
 
 		case uart3 :
-					if(getDigitalPin(14)==1)//检测不接收数据
+					if(getDigitalPin(14)==1)// 检测不接收数据
 					{             
 						return uartData=0;
 					}
@@ -2245,9 +2245,9 @@ uint8_t getIRPin(uint8_t _uart)
 
 		default : break;	
 	}
-	if(uartData!=0 && uartData!=255)//过滤引导码
+	if(uartData!=0 && uartData!=255)// 过滤引导码
 	{
-		return uartData;//返回遥控器值
+		return uartData;// 返回遥控器值
 	}
 }
 */
@@ -2259,32 +2259,32 @@ uint8_t getIRPin(uint8_t _uart)
  */
 uint8_t j = 0;
 uint8_t jj = 0;
-uint8_t bluetoothFlag[4] = {0, 0, 0, 0}; //串口初始化标志位
+uint8_t bluetoothFlag[4] = {0, 0, 0, 0}; // 串口初始化标志位
 uint16_t getBluetoothPin(uint8_t _uart, uint8_t mode)
 {
-	uint8_t dataByte[RF_NUM] = {0x00}; //数据缓冲区
-	uint16_t dataInt = 999;			   //返回数据
-	uint32_t code = 0;				   //键码
+	uint8_t dataByte[RF_NUM] = {0x00}; // 数据缓冲区
+	uint16_t dataInt = 999;			   // 返回数据
+	uint32_t code = 0;				   // 键码
 
-	if (bluetoothFlag[_uart] == 0) //初始化
+	if (bluetoothFlag[_uart] == 0) // 初始化
 	{
 		bluetoothFlag[_uart] = 1;
 		switch (_uart)
 		{
-		case uart0:				  //RX-0 TX-1
-			Serial.begin(115200); //开串口接收
+		case uart0:				  // RX-0 TX-1
+			Serial.begin(115200); // 开串口接收
 			break;
 
-		case uart1:				   //RX-19 TX-18 分别对应 编码m4 m3
-			Serial1.begin(115200); //开串口接收
+		case uart1:				   // RX-19 TX-18 分别对应 编码m4 m3
+			Serial1.begin(115200); // 开串口接收
 			break;
 
-		case uart2:				   //RX-17 TX-16
-			Serial2.begin(115200); //开串口接收
+		case uart2:				   // RX-17 TX-16
+			Serial2.begin(115200); // 开串口接收
 			break;
 
-		case uart3:				   //RX-15 TX-14
-			Serial3.begin(115200); //开串口接收
+		case uart3:				   // RX-15 TX-14
+			Serial3.begin(115200); // 开串口接收
 			break;
 
 		default:
@@ -2292,33 +2292,33 @@ uint16_t getBluetoothPin(uint8_t _uart, uint8_t mode)
 		}
 	}
 
-	switch (_uart) //接收数据
+	switch (_uart) // 接收数据
 	{
 	case uart0:
-		if (Serial.available() > 0) //检测接收数据
+		if (Serial.available() > 0) // 检测接收数据
 		{
-			Serial.readBytes(dataByte, RF_NUM); //存储数据
+			Serial.readBytes(dataByte, RF_NUM); // 存储数据
 		}
 		break;
 
 	case uart1:
-		if (Serial1.available() > 0) //检测接收数据
+		if (Serial1.available() > 0) // 检测接收数据
 		{
-			Serial1.readBytes(dataByte, RF_NUM); //存储数据
+			Serial1.readBytes(dataByte, RF_NUM); // 存储数据
 		}
 		break;
 
 	case uart2:
-		if (Serial2.available() > 0) //检测接收数据
+		if (Serial2.available() > 0) // 检测接收数据
 		{
-			Serial2.readBytes(dataByte, RF_NUM); //存储数据;
+			Serial2.readBytes(dataByte, RF_NUM); // 存储数据;
 		}
 		break;
 
 	case uart3:
-		if (Serial3.available() > 0) //检测接收数据
+		if (Serial3.available() > 0) // 检测接收数据
 		{
-			Serial3.readBytes(dataByte, RF_NUM); //存储数据
+			Serial3.readBytes(dataByte, RF_NUM); // 存储数据
 		}
 		break;
 
@@ -2326,17 +2326,17 @@ uint16_t getBluetoothPin(uint8_t _uart, uint8_t mode)
 		break;
 	}
 
-	if (dataByte[0] == 0x56 && dataByte[1] == 0xAB && dataByte[2] == 0x14 && dataByte[3] == 0xE8 && dataByte[4] == 0x10) //检查包头
+	if (dataByte[0] == 0x56 && dataByte[1] == 0xAB && dataByte[2] == 0x14 && dataByte[3] == 0xE8 && dataByte[4] == 0x10) // 检查包头
 	{
-		if (mode == 0) //组合键码
+		if (mode == 0) // 组合键码
 		{
 			code = (uint32_t)dataByte[5] * 0x1000000 + (uint32_t)dataByte[6] * 0x10000 + (uint32_t)dataByte[7] * 0x100 + (uint32_t)dataByte[8];
-			dataInt = (uint16_t)code; //2个字节
+			dataInt = (uint16_t)code; // 2个字节
 		}
-		else if (mode == 1) //单一键值--低位优先
+		else if (mode == 1) // 单一键值--低位优先
 		{
 			code = (uint32_t)dataByte[5] * 0x1000000 + (uint32_t)dataByte[6] * 0x10000 + (uint32_t)dataByte[7] * 0x100 + (uint32_t)dataByte[8];
-			for (int n = 0; n < 32; n++) //32个按键空间
+			for (int n = 0; n < 32; n++) // 32个按键空间
 			{
 				if (code & (1 << n))
 				{
@@ -2349,7 +2349,7 @@ uint16_t getBluetoothPin(uint8_t _uart, uint8_t mode)
 		j = 0;
 		return dataInt;
 	}
-	else if (1) //清缓存
+	else if (1) // 清缓存
 	{
 		if (j <= 300)
 		{
@@ -2369,7 +2369,7 @@ uint16_t getBluetoothPin(uint8_t _uart, uint8_t mode)
 	}
 }
 
-//硬IIC
+// 硬IIC
 /****LCD1602_IIC显示ASCII码****/
 /*
  * addr: 地址(0x3F/0x27)
@@ -2377,31 +2377,31 @@ uint16_t getBluetoothPin(uint8_t _uart, uint8_t mode)
  * y:列(0-15)
  * str: 字符/字符串格式
  */
-uint8_t LCDFlag = 0; //LCD初始化标志位
+uint8_t LCDFlag = 0; // LCD初始化标志位
 void setLCDWriteStr(uint8_t addr, uint8_t x, uint8_t y, char *str)
 {
-	LiquidCrystal_I2C lcd(addr, 16, 4); //设备地址
+	LiquidCrystal_I2C lcd(addr, 16, 4); // 设备地址
 
 	if (LCDFlag == 0)
 	{
 		LCDFlag = 1;
-		lcd.init(); //初始化
+		lcd.init(); // 初始化
 	}
-	lcd.backlight();	 //亮屏
-	lcd.setCursor(y, x); //设置显示XY坐标
-	lcd.print(str);		 //显示字符
+	lcd.backlight();	 // 亮屏
+	lcd.setCursor(y, x); // 设置显示XY坐标
+	lcd.print(str);		 // 显示字符
 }
 void setLCDWriteStr(uint8_t addr, uint8_t x, uint8_t y, String str)
 {
-	LiquidCrystal_I2C lcd(addr, 16, 4); //设备地址
+	LiquidCrystal_I2C lcd(addr, 16, 4); // 设备地址
 	if (LCDFlag == 0)
 	{
 		LCDFlag = 1;
-		lcd.init(); //初始化
+		lcd.init(); // 初始化
 	}
-	lcd.backlight();	 //亮屏
-	lcd.setCursor(y, x); //设置显示XY坐标
-	lcd.print(str);		 //显示字符
+	lcd.backlight();	 // 亮屏
+	lcd.setCursor(y, x); // 设置显示XY坐标
+	lcd.print(str);		 // 显示字符
 }
 
 /*
@@ -2413,38 +2413,38 @@ void setLCDWriteStr(uint8_t addr, uint8_t x, uint8_t y, String str)
 void setLCDWriteInt(uint8_t addr, uint8_t x, uint8_t y, long longNum)
 {
 	uint32_t _longNum;
-	uint8_t _charNum[4], zf; //4位有效数字
+	uint8_t _charNum[4], zf; // 4位有效数字
 
-	LiquidCrystal_I2C lcd(addr, 16, 4); //设备地址
+	LiquidCrystal_I2C lcd(addr, 16, 4); // 设备地址
 
 	if (LCDFlag == 0)
 	{
 		LCDFlag = 1;
-		lcd.init(); //初始化
+		lcd.init(); // 初始化
 	}
-	lcd.backlight(); //亮屏
+	lcd.backlight(); // 亮屏
 
-	if (longNum >= 0) //输入正数
+	if (longNum >= 0) // 输入正数
 	{
 		zf = -1;
 	}
-	else //输入负数
+	else // 输入负数
 	{
 		lcd.setCursor(y, x);
-		lcd.write(0x2D); //-
+		lcd.write(0x2D); // -
 		zf = 0;
 	}
 
-	_longNum = abs(longNum); //取正整数
+	_longNum = abs(longNum); // 取正整数
 
-	_charNum[3] = (_longNum / 1000);	   //千位
-	_charNum[2] = (_longNum % 1000) / 100; //百位
-	_charNum[1] = (_longNum % 100) / 10;   //十位
-	_charNum[0] = (_longNum % 10) / 1;	   //个位
+	_charNum[3] = (_longNum / 1000);	   // 千位
+	_charNum[2] = (_longNum % 1000) / 100; // 百位
+	_charNum[1] = (_longNum % 100) / 10;   // 十位
+	_charNum[0] = (_longNum % 10) / 1;	   // 个位
 
-	for (int i = 0; i < 4; i++) //十进制改十六进制
+	for (int i = 0; i < 4; i++) // 十进制改十六进制
 	{
-		_charNum[i] = _charNum[i] + 48; //ASCII码表
+		_charNum[i] = _charNum[i] + 48; // ASCII码表
 	}
 
 	for (int i = 1; i < 5; i++)
@@ -2463,46 +2463,46 @@ void setLCDWriteInt(uint8_t addr, uint8_t x, uint8_t y, long longNum)
 void setLCDWriteFloat(uint8_t addr, uint8_t x, uint8_t y, float floatNum)
 {
 	uint32_t _longNum;
-	uint8_t _charNum[7], zf; //6位有效数字+小数点
+	uint8_t _charNum[7], zf; // 6位有效数字+小数点
 
-	LiquidCrystal_I2C lcd(addr, 16, 4); //设备地址
+	LiquidCrystal_I2C lcd(addr, 16, 4); // 设备地址
 
 	if (LCDFlag == 0)
 	{
 		LCDFlag = 1;
-		lcd.init(); //初始化
+		lcd.init(); // 初始化
 	}
-	lcd.backlight(); //亮屏
+	lcd.backlight(); // 亮屏
 
-	if (floatNum >= 0) //输入正数
+	if (floatNum >= 0) // 输入正数
 	{
 		zf = -1;
 	}
-	else //输入负数
+	else // 输入负数
 	{
 		lcd.setCursor(y, x);
 		// lcd.print("-");
-		lcd.write(0x2D); //-
+		lcd.write(0x2D); // -
 		zf = 0;
 	}
 
-	_longNum = (uint32_t)(fabs(floatNum) * 100); //取两位小数的正整数
+	_longNum = (uint32_t)(fabs(floatNum) * 100); // 取两位小数的正整数
 
-	_charNum[6] = (_longNum / 100000);		   //千位
-	_charNum[5] = (_longNum % 100000) / 10000; //百位
-	_charNum[4] = (_longNum % 10000) / 1000;   //十位
-	_charNum[3] = (_longNum % 1000) / 100;	   //个位
-	_charNum[2] = 0x2E;						   //小数点'.'
-	_charNum[1] = (_longNum % 100) / 10;	   //十分位
-	_charNum[0] = (_longNum % 10) / 1;		   //百分位
+	_charNum[6] = (_longNum / 100000);		   // 千位
+	_charNum[5] = (_longNum % 100000) / 10000; // 百位
+	_charNum[4] = (_longNum % 10000) / 1000;   // 十位
+	_charNum[3] = (_longNum % 1000) / 100;	   // 个位
+	_charNum[2] = 0x2E;						   // 小数点'.'
+	_charNum[1] = (_longNum % 100) / 10;	   // 十分位
+	_charNum[0] = (_longNum % 10) / 1;		   // 百分位
 
-	for (int i = 0; i < 7; i++) //十进制改十六进制
+	for (int i = 0; i < 7; i++) // 十进制改十六进制
 	{
 		switch (_charNum[i])
 		{
 		case 0:
 			_charNum[i] = 0x30;
-			break; //0-9
+			break; // 0-9
 		case 1:
 			_charNum[i] = 0x31;
 			break;
@@ -2540,18 +2540,18 @@ void setLCDWriteFloat(uint8_t addr, uint8_t x, uint8_t y, float floatNum)
 		lcd.setCursor(y + i + zf, x);
 		lcd.write(_charNum[7 - i]);
 	}
-	// setLCDClear(addr);//清屏
+	// setLCDClear(addr);// 清屏
 }
 
 void setLCDClear(uint8_t addr)
 {
-	LiquidCrystal_I2C lcd(addr, 16, 4); //设备地址
+	LiquidCrystal_I2C lcd(addr, 16, 4); // 设备地址
 	if (LCDFlag == 0)
 	{
 		LCDFlag = 1;
-		lcd.init(); //初始化
+		lcd.init(); // 初始化
 	}
-	lcd.clear(); //清屏
+	lcd.clear(); // 清屏
 }
 
 short int getRFModuleRemoteRockerPin_Balance(uint8_t pin, uint8_t flag)
@@ -2567,7 +2567,7 @@ short int getRFModuleRemoteRockerPin_Balance(uint8_t pin, uint8_t flag)
 	Soft_I2C_Write(0XA0);
 	Soft_I2C_Write(0xaa);
 	Soft_I2C_Write(0x55);
-	Soft_I2C_Write(0x05); //命令,查询接收缓冲
+	Soft_I2C_Write(0x05); // 命令,查询接收缓冲
 	check_sum += 0x05;
 	Soft_I2C_Write(0x04);
 	check_sum += 0x04;
@@ -2578,14 +2578,14 @@ short int getRFModuleRemoteRockerPin_Balance(uint8_t pin, uint8_t flag)
 
 	Soft_I2C_Start();
 	Soft_I2C_Write(0XA0 + 1);
-	for (n = 0; n < 15; n++) //一次要读取完所有缓冲数据
+	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);
 	}
 	rf_data[15] = Soft_I2C_Read(1);
 	Soft_I2C_Stop();
 
-	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) //检验命令包
+	if (rf_data[0] == 0x56 && rf_data[1] == 0xAB && rf_data[2] == 0x05 && rf_data[15] == 0xCF) // 检验命令包
 	{
 		if (flag == 1)
 		{
