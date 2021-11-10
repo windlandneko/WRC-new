@@ -304,7 +304,7 @@ union INT_TO_BYTE
 #define SINGLE_VAL 0  //键值
 
 /****函数声明*****/
-uint32_t getSystemTime_ms();                       //读取系统时间 ms（毫秒）
+uint32_t clock_ms();                       //读取系统时间 ms（毫秒）
 uint32_t getSystemTime_us();                       //读取系统时间 us（微秒）
 void setDelay_ms(uint32_t _time_ms);               //设置延时时间 ms（毫秒）
 void setDelay_us(uint32_t _time_us);               //设置延时时间 us（微秒）
@@ -327,8 +327,7 @@ int getKey();                                                               //�
 int getInfraredPin(uint8_t pin);                                            //读取人体红外输入
 int getTouchPin(uint8_t pin);                                               //读取触碰输入
 int getTrackingPin(uint8_t pin);                                            //读取循迹输入
-void setRGB(uint8_t color);                                                 //设置板载RGB彩灯输出
-void setRGBPin(uint8_t R_pin, uint8_t G_pin, uint8_t B_pin, uint8_t color); //设置RGB彩灯输出
+void setRGB(uint8_t color, uint8_t B_pin = 47, uint8_t G_pin = 48, uint8_t R_pin = 49); //设置RGB彩灯输出
 int getDHT11Pin(uint8_t pin, uint8_t command);                              //读取温/湿度输入
 int getIRPin(uint8_t pin);                                                  //读取红外接收输入
 //SK6812

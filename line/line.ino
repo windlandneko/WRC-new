@@ -48,17 +48,11 @@ void selectRG()
   resetPid();
 }
 // 左转
-void TurnLeft()
-{
-  Turn(-5, 35, 2);
-}
+void turn_left() { Turn(-5, 35, 2); }
 // 右转
-void TurnRight()
-{
-  Turn(35, -5, 4);
-}
+void turn_right() { Turn(35, -5, 4); }
 // 等待检测货物状态
-void waitGoods()
+void wait_goods()
 {
   int countR = 0, countB = 0;
   int R = 0, G = 0, B = 0;
@@ -91,39 +85,39 @@ void waitGoods()
   }
 }
 // 舵机初始位置(准备获取货物位置)，需要实测更改角度
-void getGoods()
+void load_goods()
 {
   setservo(4, 80);
   delay(1000);
 }
 // 舵机卸货角度，需要实测
-void setGoods()
+void unload_goods()
 {
   setservo(4, 110);
   delay(1000);
 }
 
 // 红色区出发，到红方食物区卸货
-void H_shiwu()
+void red_food()
 {
 
   goline(1);           // 巡线1条横线
-  TurnRight();         // 右转
+  turn_right();        // 右转
   goline(6);           // 巡线4条线
-  TurnLeft();          // 左转
+  turn_left();         // 左转
   goline(2);           // 巡线2条线
   golinecode(650);     // 编码巡线走450的距离
   gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  setGoods();          // 卸货
+  unload_goods();      // 卸货
   delay(1000);
-  getGoods(); // 恢复接货状态
+  load_goods(); // 恢复接货状态
   gocode(-20, 20, 200);
   Turn(-20, 20, 2); // 原地转180°掉头
   golinecode(400);  // 用编码前进一点距离，越过第一个路口
   goline(2);
-  TurnRight();
+  turn_right();
   goline(6);
-  TurnLeft();
+  turn_left();
   goline(1);
   gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
   delay(1000);
@@ -131,29 +125,29 @@ void H_shiwu()
   delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
   gocode(600, -20, -20); // 然后让机器后退一定距离
   gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  waitGoods();           // 等待货物
+  wait_goods();          // 等待货物
   gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过红色区域,接上循环
 }
 // 红方饮料区卸货
-void H_yinliao()
+void red_drink()
 {
   goline(1);           // 巡线1条横线
-  TurnRight();         // 右转
+  turn_right();        // 右转
   goline(4);           // 巡线4条线
-  TurnLeft();          // 左转
+  turn_left();         // 左转
   goline(2);           // 巡线2条线
   golinecode(650);     // 编码巡线走450的距离
   gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  setGoods();          // 卸货
+  unload_goods();      // 卸货
   delay(1000);
-  getGoods(); // 恢复接货状态
+  load_goods(); // 恢复接货状态
 
   Turn(-20, 20, 2); // 原地转180°掉头
   golinecode(400);  // 用编码前进一点距离，越过第一个路口
   goline(2);
-  TurnRight();
+  turn_right();
   goline(4);
-  TurnLeft();
+  turn_left();
   goline(1);
   gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
   delay(1000);
@@ -161,30 +155,30 @@ void H_yinliao()
   delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
   gocode(600, -20, -20); // 然后让机器后退一定距离
   gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  waitGoods();           // 等待货物
+  wait_goods();          // 等待货物
   gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过红色区域,接上循环
 }
 // 蓝方方食物区卸货
-void L_shiwu()
+void blue_food()
 {
 
   goline(2); // 巡线2条横线
-  TurnLeft();
+  turn_left();
   goline(6);
-  TurnRight();
+  turn_right();
   goline(1);
   golinecode(650);     // 编码巡线走450的距离
   gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  setGoods();          // 卸货
+  unload_goods();      // 卸货
   delay(1000);
-  getGoods(); // 恢复接货状态
+  load_goods(); // 恢复接货状态
 
   Turn(-20, 20, 3); // 原地转180°掉头
   golinecode(400);  // 用编码前进一点距离，越过第一个路口
   goline(1);
-  TurnLeft();
+  turn_left();
   goline(6);
-  TurnRight();
+  turn_right();
   goline(2);
 
   gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
@@ -193,30 +187,30 @@ void L_shiwu()
   delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
   gocode(600, -20, -20); // 然后让机器后退一定距离
   gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  waitGoods();           // 等待货物
+  wait_goods();          // 等待货物
   gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过蓝色区域,接上循环
 }
 // 蓝方方饮料区卸货
-void L_yinliao()
+void blue_drink()
 {
 
   goline(2); // 巡线1条横线
-  TurnLeft();
+  turn_left();
   goline(4);
-  TurnRight();
+  turn_right();
   goline(1);
   golinecode(650);     // 编码巡线走450的距离
   gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  setGoods();          // 卸货
+  unload_goods();      // 卸货
   delay(1000);
-  getGoods(); // 恢复接货状态
+  load_goods(); // 恢复接货状态
 
   Turn(-20, 20, 2); // 原地转180°掉头
   golinecode(400);  // 用编码前进一点距离，越过第一个路口
   goline(1);
-  TurnLeft();
+  turn_left();
   goline(4);
-  TurnRight();
+  turn_right();
   goline(2);
 
   gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
@@ -225,30 +219,29 @@ void L_yinliao()
   delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
   gocode(600, -20, -20); // 然后让机器后退一定距离
   gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  waitGoods();           // 等待货物
+  wait_goods();          // 等待货物
   gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过蓝色区域,接上循环
 }
 // 程序开始
 void setup()
 {
-
   initLine();
-  selectRG(); // 选择红蓝方程序
-  getGoods(); // 进入等待获取货物状态
+  selectRG();   // 选择红蓝方程序
+  load_goods(); // 进入等待获取货物状态
   // 先检测是红方还是蓝方
-  waitGoods();         // 等待第一个货物
+  wait_goods();        // 等待第一个货物
   gocode(700, 30, 30); // 先用左右马达各30的速度走700个编码脉冲，离开红蓝色区域，此处为开始
   if (isRedTeam)
   {
     if (program == 1)
     {
       // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      H_shiwu();
+      red_food();
     }
     else if (program == 2)
     {
       // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      H_yinliao();
+      red_drink();
     }
   }
   else
@@ -256,30 +249,29 @@ void setup()
     if (program == 1)
     {
       // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      L_shiwu();
+      blue_food();
     }
     else if (program == 2)
     {
       // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      L_yinliao();
+      blue_drink();
     }
   }
 }
 
 void loop()
 {
-
   if (isRedTeam)
   {
     if (WG == 0)
     {
       setRGB(0);
-      H_shiwu(); // 去红方食物区
+      red_food(); // 去红方食物区
     }
     else
     {
       setRGB(2);
-      H_yinliao(); // 去红方饮料区
+      red_drink(); // 去红方饮料区
     }
   }
   else
@@ -287,12 +279,12 @@ void loop()
     if (WG == 0)
     {
       setRGB(0);
-      L_shiwu(); // 去红方食物区
+      blue_food(); // 去红方食物区
     }
     else
     {
       setRGB(2);
-      L_yinliao(); // 去蓝方食物区
+      blue_drink(); // 去蓝方食物区
     }
   }
 }

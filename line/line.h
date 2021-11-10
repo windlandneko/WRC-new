@@ -120,13 +120,9 @@ void line(int sp = 35)
     }
   }
   if (S1)
-  {
     g_linestate = 2;
-  }
   if (S5)
-  {
     g_linestate = 4;
-  }
 }
 //时间循迹，单位ms
 void golineTime(long time, int sp = 35)

@@ -3,7 +3,7 @@
 #include <JMDlib.h>
 // System----------------------------------------------------------------------------
 /****读取系统时间****/
-uint32_t getSystemTime_ms() // 毫秒
+uint32_t clock_ms() // 毫秒
 {
 	return millis();
 }
@@ -783,90 +783,17 @@ int getTrackingPin(uint8_t pin)
 }
 
 /****RGB全彩灯****/
-uint8_t RGBFlag = 0; // 内置RGB初始化标志位
-
-/*
- * color: 红绿蓝 黄紫青 白黑
- */
-void setRGB(uint8_t color) // 内置
-{
-	uint8_t red;
-	uint8_t blue;
-	uint8_t green;
-
-	if (RGBFlag == 0)
-	{
-		RGBFlag = 1;
-		pinMode(47, OUTPUT);
-		pinMode(48, OUTPUT);
-		pinMode(49, OUTPUT);
-	}
-	switch (color)
-	{
-	case 0:
-		red = LOW;
-		green = HIGH;
-		blue = HIGH;
-		break; // 红
-	case 1:
-		red = HIGH;
-		green = LOW;
-		blue = HIGH;
-		break; // 绿
-	case 2:
-		red = HIGH;
-		green = HIGH;
-		blue = LOW;
-		break; // 蓝
-
-	case 3:
-		red = LOW;
-		green = LOW;
-		blue = HIGH;
-		break; // 黄
-	case 4:
-		red = LOW;
-		green = HIGH;
-		blue = LOW;
-		break; // 紫
-	case 5:
-		red = HIGH;
-		green = LOW;
-		blue = LOW;
-		break; // 青
-
-	case 6:
-		red = LOW;
-		green = LOW;
-		blue = LOW;
-		break; // 白
-	case 7:
-		red = HIGH;
-		green = HIGH;
-		blue = HIGH;
-		break; // 黑
-	default:
-		break;
-	}
-	digitalWrite(47, blue);
-	digitalWrite(48, green);
-	digitalWrite(49, red);
-}
-
-uint8_t RGBPinFlag = 0; // 外置RGB初始化标志位
+uint8_t RGB_flag = 0; // RGB初始化标志位
 /*
  * R_pin/G_pin/B_pin： DIGITAL端口
  * color: 红绿蓝 黄紫青 白黑
  */
-void setRGBPin(uint8_t R_pin, uint8_t G_pin, uint8_t B_pin, uint8_t color) // 外置
+void setRGB(uint8_t color, uint8_t B_pin = 47, uint8_t G_pin = 48, uint8_t R_pin = 49) // 外置
 {
-	uint8_t red;
-	uint8_t blue;
-	uint8_t green;
-
-	if (RGBPinFlag == 0)
+	uint8_t red, blue, green;
+	if (!RGB_flag)
 	{
-		RGBPinFlag = 1;
+		RGB_flag = 1;
 		pinMode(B_pin, OUTPUT);
 		pinMode(G_pin, OUTPUT);
 		pinMode(R_pin, OUTPUT);
@@ -924,14 +851,12 @@ void setRGBPin(uint8_t R_pin, uint8_t G_pin, uint8_t B_pin, uint8_t color) // �
 }
 // --------------------------------------------SK6812
 
-/****DHT11温湿度****/
-/*
- * pin：DIGITAL端口
- * command:    
- **TEMPERATURE  0	// 湿度
- **CELSIUS		1	// 摄氏度
- **FAHRENHEIT	2	// 华氏度
- **SUM			3	// 总和=湿度+摄氏度
+/** DHT11温湿度
+ * @param pin DIGITAL端口   
+ *- TEMPERATURE 0	// 湿度
+ *- CELSIUS		1	// 摄氏度
+ *- FAHRENHEIT	2	// 华氏度
+ *- SUM			3	// 总和=湿度+摄氏度
  */
 int getDHT11Pin(uint8_t pin, uint8_t command)
 {

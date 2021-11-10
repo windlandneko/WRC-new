@@ -96,7 +96,7 @@ void motorPID()//PID平衡函数
 
 void yaokong()//遥控函数
 {
-    if(getSystemTime_ms()-Tyao<1500)return ;
+    if(clock_ms()-Tyao<1500)return ;
     
     turn=getRFModuleRemoteRockerPin(I2, 0, 0); 
     positionup=getRFModuleRemoteRockerPin(I2, 1, 1); 
@@ -120,7 +120,7 @@ void yaokong()//遥控函数
 }
 void setup() {  
     long TT=0;
-    Tyao=getSystemTime_ms();  //开始计数
+    Tyao=clock_ms();  //开始计数
     if(getKey()==0)  //检测是否初始平衡点--0：初始化/1：跳过
     {
         setBlance();
@@ -129,10 +129,10 @@ void setup() {
     {
         motorPID();
         
-        if(getSystemTime_ms()-TT>looptime)
+        if(clock_ms()-TT>looptime)
         {
           yaokong();
-          TT=getSystemTime_ms();
+          TT=clock_ms();
         }                            
     }
 }
