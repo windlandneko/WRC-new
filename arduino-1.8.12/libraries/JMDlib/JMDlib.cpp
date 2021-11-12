@@ -1891,7 +1891,7 @@ uint32_t getRFModuleRemoteCodePin(uint8_t pin)
 	Soft_I2C_Stop();
 
 	Soft_I2C_Start();
-	Soft_I2C_Write(0XA0 + 1);
+	Soft_I2C_Write(0xA0 + 1);
 	for (n = 0; n < 15; n++) // 一次要读取完所有缓冲数据
 	{
 		rf_data[n] = Soft_I2C_Read(0);

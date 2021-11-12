@@ -28,7 +28,7 @@ double M1S, M2S, M3S, M4S;                     // in1-4是脉冲的个数，M1-4
 int maxspeed = 100; // 最高限速
 int pidwm = 30;     // PID采样频率
 
-double Kp = 5.0, Ki = 4.8, Kd = 0.02; // PID系数
+double Kp = 5.0, Ki = 4.8, Kd = 0.0; // PID系数
 unsigned long t;
 PID M1PID(&M1S, &M1PWMOUT, &ref1, Kp, Ki, Kd, DIRECT); // 将四个电机绑定到 PID 控制上
 PID M2PID(&M2S, &M2PWMOUT, &ref2, Kp, Ki, Kd, DIRECT);
@@ -208,7 +208,7 @@ void setting()
 
 void setup()
 {
-
+  setRFPassWordPin(0, 1919810);
   Serial.begin(115200);
   Serial.println("start");
   pinMode(9, OUTPUT);
@@ -261,7 +261,7 @@ void loop()
 {
   unsigned long joyStickInput = getRFModuleRemoteCodePin(0);
   if (joyStickInput == 294) // 294 = 2^1 + 2^2 + 2^5 + 2^8
-    setting();  // 当1,2,5,8号按钮同时按下时进入设置模式
+    setting();              // 当1,2,5,8号按钮同时按下时进入设置模式
   else
   {
     if (joyStickInput == 1) // 0号按钮
@@ -270,7 +270,7 @@ void loop()
         servo(gpPin, button11_Gp + 7);
       else
         servo(gpPin, button11_Gp - 7);
-      delay(500);
+      delay(300);
       servo(up1Pin, button0_Up1);
       servo(up2Pin, button0_Up2);
     }
@@ -278,7 +278,7 @@ void loop()
     if (joyStickInput == 2048) // 11号按钮
     {
       servo(gpPin, button0_Gp);
-      delay(500);
+      delay(300);
       servo(up1Pin, button11_Up1);
       servo(up2Pin, button11_Up2);
     }
@@ -315,10 +315,10 @@ void loop()
   }
 
   /****************计算四个电机的参考转速********************/
-  int y = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_Y);
+  int godata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_Y);
   joyStickData[2] = 0;
-  if (y != 999)
-    joyStickData[2] = y / 2;
+  if (godata != 999)
+    joyStickData[2] = godata / 2;
   if ((joyStickData[2] > L) || (joyStickData[2] < R))
   {
     mafor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
@@ -327,17 +327,13 @@ void loop()
     mdfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
   }
   else
-  {
-    mafor = 0;
-    mbfor = 0;
-    mcfor = 0;
-    mdfor = 0;
-  }
+    mafor = mbfor = mcfor = mdfor = 0;
   joyStickData[1] = 0;
-  int xx = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_X);
-  if (xx != 999)
-    joyStickData[1] = xx / 2;
 
+
+  int piaoyi = getRFModuleRemoteRockerPin(0, ROCKER_RIGHT, ROCKER_X);
+  if (piaoyi != 999)
+    joyStickData[1] = piaoyi / 2;
   if ((joyStickData[1] > L) || (joyStickData[1] < R))
   {
     mago = map(joyStickData[1], -100, 100, -maxspeed, maxspeed);
@@ -350,9 +346,9 @@ void loop()
 
   joyStickData[4] = 0;
 
-  int xxx = getRFModuleRemoteRockerPin(0, ROCKER_RIGHT, ROCKER_X);
-  if (xxx != 999)
-    joyStickData[4] = -xxx / 2;
+  int turndata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_X);
+  if (turndata != 999)
+    joyStickData[4] = -turndata / 2;
 
   if (L < joyStickData[4] || joyStickData[4] < R)
   {
@@ -372,7 +368,7 @@ void loop()
   setspeed();
   moving();
   Serial.println(joyStickInput);
-  if (x && false)
+  if (x)
   {
     Serial.print(ref1);
     Serial.print(", ");
