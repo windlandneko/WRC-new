@@ -210,6 +210,7 @@ void setup()
 {
 
   Serial.begin(115200);
+  Serial.println("start");
   pinMode(9, OUTPUT);
   M1PID.SetMode(AUTOMATIC);         // 设置PID为自动模式
   M1PID.SetSampleTime(pidwm);       // 设置PID采样频率为pidwm ms
@@ -370,7 +371,8 @@ void loop()
   /*************计算4个电机的参考转速*******************/
   setspeed();
   moving();
-  if (x)
+  Serial.println(joyStickInput);
+  if (x && false)
   {
     Serial.print(ref1);
     Serial.print(", ");

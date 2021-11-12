@@ -269,7 +269,6 @@ void setMotorPin(uint8_t motor, int speed)
 		motorinitflag = getDigitalPin(24);
 		motorinit = 1;
 	}
-
 	if (motorDir == 1)
 		speed = -speed;
 	/*BE5141V11motor*/
