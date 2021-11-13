@@ -5020,3 +5020,6 @@ fonts/SourceHanSansSC-Medium.otf
 fonts/SourceHanSansSC-Normal.otf
 fonts/SourceHanSansSC-Regular.otf
 fonts/wingding.ttf
+.vscode/arduino.json
+.gitignore
+.vscode/arduino.json

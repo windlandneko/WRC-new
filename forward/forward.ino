@@ -20,20 +20,21 @@ int mbfor, mbgo, mbturn;
 int mcfor, mcgo, mcturn;
 int mdfor, mdgo, mdturn;
 
-const int L = 5, R = -5;
+const int limitL = 5, limitR = -5;
 double M1PWMOUT, M2PWMOUT, M3PWMOUT, M4PWMOUT; // 4个电机输出PWM
 double ref1, ref2, ref3, ref4;                 // 四个电机的参考转速
 double M1S, M2S, M3S, M4S;                     // in1-4是脉冲的个数，M1-4S是转换成转速（没有单位）后的值
-
+double rs1, rs2, rs3, rs4, smooth = 0.5;
+// rs1 = rs2 = rs3 = rs4 = 0;
 int maxspeed = 100; // 最高限速
 int pidwm = 30;     // PID采样频率
 
-double Kp = 5.0, Ki = 4.8, Kd = 0.0; // PID系数
+double Kp = 4.5, Ki = 4, Kd = 0.008; // PID系数
 unsigned long t;
-PID M1PID(&M1S, &M1PWMOUT, &ref1, Kp, Ki, Kd, DIRECT); // 将四个电机绑定到 PID 控制上
-PID M2PID(&M2S, &M2PWMOUT, &ref2, Kp, Ki, Kd, DIRECT);
-PID M3PID(&M3S, &M3PWMOUT, &ref3, Kp, Ki, Kd, DIRECT);
-PID M4PID(&M4S, &M4PWMOUT, &ref4, Kp, Ki, Kd, DIRECT);
+PID M1PID(&M1S, &M1PWMOUT, &rs1, Kp, Ki, Kd, DIRECT); // 将四个电机绑定到 PID 控制上
+PID M2PID(&M2S, &M2PWMOUT, &rs2, Kp, Ki, Kd, DIRECT);
+PID M3PID(&M3S, &M3PWMOUT, &rs3, Kp, Ki, Kd, DIRECT);
+PID M4PID(&M4S, &M4PWMOUT, &rs4, Kp, Ki, Kd, DIRECT);
 // ***********************************************************************
 
 // 计算速度
@@ -86,16 +87,16 @@ void setspeed()
 
 void buzzer(int t) { tone(9, 440, t); }
 
-void Event() { tone(9, 66, 30); }
+void Event() { tone(9, 400, 300); }
 
 // 同时按下遥控上的 1，2，5，8 四个按钮进入设置
 // 进入设置后，5、7 控制4号引脚舵机，6、8 控制5号引脚舵机，9、10 控制6号夹取舵机
 // 按 0 和 11 按钮保存两个挡位的角度值，按 3 或者 4 按钮退出设置
 void setting()
 {
-  tone(9, 440, 100);
+  tone(9, 640, 100);
   delay(200);
-  tone(9, 440, 100);
+  tone(9, 540, 100);
   delay(200);
   unsigned long b = 0;
   FlexiTimer2::set(1000, Event); // 每 1000 ms 触发一次 Event 函数
@@ -208,7 +209,7 @@ void setting()
 
 void setup()
 {
-  setRFPassWordPin(0, 1919810);
+  // setRFPassWordPin(0, 1919810);
   Serial.begin(115200);
   Serial.println("start");
   pinMode(9, OUTPUT);
@@ -264,7 +265,7 @@ void loop()
     setting();              // 当1,2,5,8号按钮同时按下时进入设置模式
   else
   {
-    if (joyStickInput == 1) // 0号按钮
+    if (joyStickInput & 1) // 0号按钮
     {
       if (button11_Gp > button0_Gp)
         servo(gpPin, button11_Gp + 7);
@@ -275,7 +276,7 @@ void loop()
       servo(up2Pin, button0_Up2);
     }
 
-    if (joyStickInput == 2048) // 11号按钮
+    if (joyStickInput & 2048) // 11号按钮
     {
       servo(gpPin, button0_Gp);
       delay(300);
@@ -297,7 +298,7 @@ void loop()
       servo(up1Pin, button11_Up1);
       servo(up2Pin, button11_Up2);
     }
-    if (joyStickInput == 16) // 4号按钮
+    if (joyStickInput & 16) // 4号按钮
     {
       if (button11_Gp > button0_Gp)
         servo(gpPin, button11_Gp + 7);
@@ -319,7 +320,8 @@ void loop()
   joyStickData[2] = 0;
   if (godata != 999)
     joyStickData[2] = godata / 2;
-  if ((joyStickData[2] > L) || (joyStickData[2] < R))
+
+  if ((joyStickData[2] > limitL) || (joyStickData[2] < limitR))
   {
     mafor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
     mbfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
@@ -330,11 +332,10 @@ void loop()
     mafor = mbfor = mcfor = mdfor = 0;
   joyStickData[1] = 0;
 
-
   int piaoyi = getRFModuleRemoteRockerPin(0, ROCKER_RIGHT, ROCKER_X);
   if (piaoyi != 999)
     joyStickData[1] = piaoyi / 2;
-  if ((joyStickData[1] > L) || (joyStickData[1] < R))
+  if ((joyStickData[1] > limitL) || (joyStickData[1] < limitR))
   {
     mago = map(joyStickData[1], -100, 100, -maxspeed, maxspeed);
     mbgo = map(joyStickData[1], -100, 100, maxspeed, -maxspeed);
@@ -350,12 +351,12 @@ void loop()
   if (turndata != 999)
     joyStickData[4] = -turndata / 2;
 
-  if (L < joyStickData[4] || joyStickData[4] < R)
+  if (limitL < joyStickData[4] || joyStickData[4] < limitR)
   {
-    maturn = map(joyStickData[4], -100, 100, 70, -70);
-    mbturn = map(joyStickData[4], -100, 100, -70, 70);
-    mcturn = map(joyStickData[4], -100, 100, -70, 70);
-    mdturn = map(joyStickData[4], -100, 100, 70, -70);
+    maturn = map(joyStickData[4], -100, 100, maxspeed, -maxspeed);
+    mbturn = map(joyStickData[4], -100, 100, -maxspeed, maxspeed);
+    mcturn = map(joyStickData[4], -100, 100, -maxspeed, maxspeed);
+    mdturn = map(joyStickData[4], -100, 100, maxspeed, -maxspeed);
   }
   else
     maturn = mbturn = mcturn = mdturn = 0;
@@ -364,6 +365,10 @@ void loop()
   ref2 = max(min(mbfor + mbgo + mbturn, maxspeed), -maxspeed);
   ref3 = max(min(mcfor + mcgo + mcturn, maxspeed), -maxspeed);
   ref4 = max(min(mdfor + mdgo + mdturn, maxspeed), -maxspeed);
+  rs1 = ref1 * (1 - smooth) + rs1 * smooth;
+  rs2 = ref2 * (2 - smooth) + rs2 * smooth;
+  rs3 = ref3 * (3 - smooth) + rs3 * smooth;
+  rs4 = ref4 * (4 - smooth) + rs4 * smooth;
   /*************计算4个电机的参考转速*******************/
   setspeed();
   moving();
@@ -389,7 +394,7 @@ void loop()
     Serial.print(", ");
     Serial.println(joyStickInput);
 
-    if ((joyStickData[1] < L) && (joyStickData[1] > R) && (joyStickData[2] < L) && (joyStickData[2] > R) && (joyStickData[4] < L) && (joyStickData[4] > R))
+    if ((joyStickData[1] < limitL) && (joyStickData[1] > limitR) && (joyStickData[2] < limitL) && (joyStickData[2] > limitR) && (joyStickData[4] < limitL) && (joyStickData[4] > limitR))
       stop_all();
   }
 }
