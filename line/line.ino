@@ -3,16 +3,12 @@
 
 // 扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 // 这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
-int isRedTeam = 1; // 红蓝方信息数值为1时为红方出发
-int WG = 0;
+int isRedTeam = 0; // 红蓝方信息数值为1时为红方出发
+bool WG = false;
 int program = 0;
 // 通过手动转动左或者右马达后，启动机器，完成机器选择红蓝方启动的过程
 void selectRG()
 {
-  Serial.print("M3S:");
-  Serial.print(getMotor3Code());
-  Serial.print(",M4S:");
-  Serial.println(getMotor4Code());
   if (getMotor4Code() > 200)
   {
     // 当左马达往前转，右马达后转各200个脉冲，表示红方出发，
@@ -57,7 +53,7 @@ void wait_goods()
   int countR = 0, countB = 0;
   int R = 0, G = 0, B = 0;
   resetPid();
-  while (1)
+  while (true)
   {
     R = getColorSensorPin(0, 6); // 获得颜色传感器R红色分量
     G = getColorSensorPin(0, 7); // 获得颜色传感器G
@@ -73,13 +69,13 @@ void wait_goods()
 
     if (countR > 20)
     {
-      WG = 0;
+      WG = false;
       return;
     }
 
     if (countB > 20)
     {
-      WG = 2;
+      WG = true;
       return;
     }
   }
@@ -88,13 +84,13 @@ void wait_goods()
 void load_goods()
 {
   setservo(4, 80);
-  delay(1000);
+  delay(800);
 }
 // 舵机卸货角度，需要实测
 void unload_goods()
 {
   setservo(4, 110);
-  delay(1000);
+  delay(800);
 }
 
 // 红色区出发，到红方食物区卸货
@@ -193,7 +189,6 @@ void blue_food()
 // 蓝方方饮料区卸货
 void blue_drink()
 {
-
   goline(2); // 巡线1条横线
   turn_left();
   goline(4);
@@ -229,62 +224,65 @@ void setup()
   selectRG();   // 选择红蓝方程序
   load_goods(); // 进入等待获取货物状态
   // 先检测是红方还是蓝方
-  wait_goods();        // 等待第一个货物
-  gocode(700, 30, 30); // 先用左右马达各30的速度走700个编码脉冲，离开红蓝色区域，此处为开始
-  if (isRedTeam)
+  for (int i = 0; i < 10; i++)
   {
-    if (program == 1)
+    wait_goods();        // 等待第一个货物
+    gocode(700, 30, 30); // 先用左右马达各 30 的速度走 700 个编码脉冲，离开红蓝色区域，此处为开始
+    if (isRedTeam)
     {
-      // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      red_food();
+      if (program == 1)
+      {
+        // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
+        red_food();
+      }
+      else if (program == 2)
+      {
+        // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
+        red_drink();
+      }
     }
-    else if (program == 2)
+    else
     {
-      // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      red_drink();
-    }
-  }
-  else
-  {
-    if (program == 1)
-    {
-      // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      blue_food();
-    }
-    else if (program == 2)
-    {
-      // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
-      blue_drink();
+      if (program == 1)
+      {
+        // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
+        blue_food();
+      }
+      else if (program == 2)
+      {
+        // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
+        blue_drink();
+      }
     }
   }
 }
 
 void loop()
 {
-  if (isRedTeam)
-  {
-    if (WG == 0)
-    {
-      setRGB(0);
-      red_food(); // 去红方食物区
-    }
-    else
-    {
-      setRGB(2);
-      red_drink(); // 去红方饮料区
-    }
-  }
-  else
-  {
-    if (WG == 0)
-    {
-      setRGB(0);
-      blue_food(); // 去红方食物区
-    }
-    else
-    {
-      setRGB(2);
-      blue_drink(); // 去蓝方食物区
-    }
-  }
+  // if (isRedTeam)
+  // {
+  //   if (WG == false)
+  //   {
+  //     setRGB(0);
+  //     red_food(); // 去红方食物区
+  //   }
+  //   else
+  //   {
+  //     setRGB(2);
+  //     red_drink(); // 去红方饮料区
+  //   }
+  // }
+  // else
+  // {
+  //   if (WG == false)
+  //   {
+  //     setRGB(0);
+  //     blue_food(); // 去红方食物区
+  //   }
+  //   else
+  //   {
+  //     setRGB(2);
+  //     blue_drink(); // 去蓝方食物区
+  //   }
+  // }
 }

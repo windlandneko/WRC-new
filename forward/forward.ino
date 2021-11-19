@@ -20,16 +20,16 @@ int mbfor, mbgo, mbturn;
 int mcfor, mcgo, mcturn;
 int mdfor, mdgo, mdturn;
 
-const int limitL = 5, limitR = -5;
+const int limitL = 2, limitR = -2;
 double M1PWMOUT, M2PWMOUT, M3PWMOUT, M4PWMOUT; // 4个电机输出PWM
 double ref1, ref2, ref3, ref4;                 // 四个电机的参考转速
 double M1S, M2S, M3S, M4S;                     // in1-4是脉冲的个数，M1-4S是转换成转速（没有单位）后的值
-double rs1, rs2, rs3, rs4, smooth = 0.5;
+double rs1, rs2, rs3, rs4, smooth = 0.75;
 // rs1 = rs2 = rs3 = rs4 = 0;
 int maxspeed = 100; // 最高限速
 int pidwm = 30;     // PID采样频率
 
-double Kp = 4.5, Ki = 4, Kd = 0.008; // PID系数
+double Kp = 5.0, Ki = 1.0, Kd = 0.02; // PID系数
 unsigned long t;
 PID M1PID(&M1S, &M1PWMOUT, &rs1, Kp, Ki, Kd, DIRECT); // 将四个电机绑定到 PID 控制上
 PID M2PID(&M2S, &M2PWMOUT, &rs2, Kp, Ki, Kd, DIRECT);
@@ -257,7 +257,7 @@ void setup()
   pinMode(gpPin, OUTPUT);  // 设定舵机接口为输出接口
   Serial.println("init OK");
 }
-
+int backward = 0;
 void loop()
 {
   unsigned long joyStickInput = getRFModuleRemoteCodePin(0);
@@ -279,11 +279,14 @@ void loop()
     if (joyStickInput & 2048) // 11号按钮
     {
       servo(gpPin, button0_Gp);
-      delay(300);
+      delay(100);
+      backward = 20;
+    }
+    if(backward == 1)
+    {
       servo(up1Pin, button11_Up1);
       servo(up2Pin, button11_Up2);
     }
-
     if (joyStickInput & 2) // 1号按钮
     {
       servo(up1Pin, button0_Up1);
@@ -304,7 +307,7 @@ void loop()
         servo(gpPin, button11_Gp + 7);
       else
         servo(gpPin, button11_Gp - 7);
-      delay(500);
+      delay(300);
     }
   }
   int x = 0;
@@ -317,6 +320,11 @@ void loop()
 
   /****************计算四个电机的参考转速********************/
   int godata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_Y);
+  if(backward != 0)
+  {
+    godata = -100;
+    backward -= 1;
+  }
   joyStickData[2] = 0;
   if (godata != 999)
     joyStickData[2] = godata / 2;
@@ -324,7 +332,7 @@ void loop()
   if ((joyStickData[2] > limitL) || (joyStickData[2] < limitR))
   {
     mafor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
-    mbfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
+    mbfor = map(jfoyStickData[2], -100, 100, -maxspeed, maxspeed);
     mcfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
     mdfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
   }
@@ -337,26 +345,27 @@ void loop()
     joyStickData[1] = piaoyi / 2;
   if ((joyStickData[1] > limitL) || (joyStickData[1] < limitR))
   {
-    mago = map(joyStickData[1], -100, 100, -maxspeed, maxspeed);
-    mbgo = map(joyStickData[1], -100, 100, maxspeed, -maxspeed);
-    mcgo = map(joyStickData[1], -100, 100, -maxspeed, maxspeed);
-    mdgo = map(joyStickData[1], -100, 100, maxspeed, -maxspeed);
+    mago = map(joyStickData[1], -100, 100, -80, 80);
+    mbgo = map(joyStickData[1], -100, 100, 80, -80);
+    mcgo = map(joyStickData[1], -100, 100, -80, 80);
+    mdgo = map(joyStickData[1], -100, 100, 80, -80);
   }
   else
     mago = mbgo = mcgo = mdgo = 0;
 
   joyStickData[4] = 0;
 
-  int turndata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_X);
+  int turndata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_X), k = 1;
   if (turndata != 999)
     joyStickData[4] = -turndata / 2;
-
-  if (limitL < joyStickData[4] || joyStickData[4] < limitR)
+  if(joyStickData[2] != 0 )
+    k = 2;
+  if (limitL * k < joyStickData[4] || joyStickData[4] < limitR * k)
   {
-    maturn = map(joyStickData[4], -100, 100, maxspeed, -maxspeed);
-    mbturn = map(joyStickData[4], -100, 100, -maxspeed, maxspeed);
-    mcturn = map(joyStickData[4], -100, 100, -maxspeed, maxspeed);
-    mdturn = map(joyStickData[4], -100, 100, maxspeed, -maxspeed);
+    maturn = map(joyStickData[4], -100, 100, 70, -70);
+    mbturn = map(joyStickData[4], -100, 100, -70, 70);
+    mcturn = map(joyStickData[4], -100, 100, -70, 70);
+    mdturn = map(joyStickData[4], -100, 100, 70, -70);
   }
   else
     maturn = mbturn = mcturn = mdturn = 0;
@@ -366,9 +375,9 @@ void loop()
   ref3 = max(min(mcfor + mcgo + mcturn, maxspeed), -maxspeed);
   ref4 = max(min(mdfor + mdgo + mdturn, maxspeed), -maxspeed);
   rs1 = ref1 * (1 - smooth) + rs1 * smooth;
-  rs2 = ref2 * (2 - smooth) + rs2 * smooth;
-  rs3 = ref3 * (3 - smooth) + rs3 * smooth;
-  rs4 = ref4 * (4 - smooth) + rs4 * smooth;
+  rs2 = ref2 * (1 - smooth) + rs2 * smooth;
+  rs3 = ref3 * (1 - smooth) + rs3 * smooth;
+  rs4 = ref4 * (1 - smooth) + rs4 * smooth;
   /*************计算4个电机的参考转速*******************/
   setspeed();
   moving();

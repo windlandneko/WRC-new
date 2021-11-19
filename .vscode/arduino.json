@@ -1,6 +1,6 @@
 {
     "configuration": "cpu=atmega2560",
     "board": "arduino:avr:mega",
-    "sketch": "forward\\forward.ino",
-    "port": "COM6"
+    "sketch": "line\\line.ino",
+    "port": "COM5"
 }
