@@ -175,13 +175,13 @@ void setting()
       delay(500);
       break;
     }
-    Serial.print(up1);
-    Serial.print(", ");
-    Serial.print(up2);
-    Serial.print(", ");
-    Serial.print(gp);
-    Serial.print(", ");
-    Serial.println(b);
+    // Serial.print(up1);
+    // Serial.print(", ");
+    // Serial.print(up2);
+    // Serial.print(", ");
+    // Serial.print(gp);
+    // Serial.print(", ");
+    // Serial.println(b);
     if (b == 3 || b == 4)
       break;
   }
@@ -280,9 +280,9 @@ void loop()
     {
       servo(gpPin, button0_Gp);
       delay(100);
-      backward = 20;
+      backward = 30;
     }
-    if(backward == 1)
+    if (backward == 10)
     {
       servo(up1Pin, button11_Up1);
       servo(up2Pin, button11_Up2);
@@ -320,9 +320,10 @@ void loop()
 
   /****************计算四个电机的参考转速********************/
   int godata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_Y);
-  if(backward != 0)
+  if (backward != 0)
   {
-    godata = -100;
+    if (backward >= 10)
+      godata = -100;
     backward -= 1;
   }
   joyStickData[2] = 0;
@@ -332,7 +333,7 @@ void loop()
   if ((joyStickData[2] > limitL) || (joyStickData[2] < limitR))
   {
     mafor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
-    mbfor = map(jfoyStickData[2], -100, 100, -maxspeed, maxspeed);
+    mbfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
     mcfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
     mdfor = map(joyStickData[2], -100, 100, -maxspeed, maxspeed);
   }
@@ -358,7 +359,7 @@ void loop()
   int turndata = getRFModuleRemoteRockerPin(0, ROCKER_LEFT, ROCKER_X), k = 1;
   if (turndata != 999)
     joyStickData[4] = -turndata / 2;
-  if(joyStickData[2] != 0 )
+  if (joyStickData[2] != 0)
     k = 2;
   if (limitL * k < joyStickData[4] || joyStickData[4] < limitR * k)
   {
@@ -381,8 +382,9 @@ void loop()
   /*************计算4个电机的参考转速*******************/
   setspeed();
   moving();
-  Serial.println(joyStickInput);
-  if (x)
+  // Serial.println(joyStickInput);
+  Serial.println(backward);
+  if (x && false)
   {
     Serial.print(ref1);
     Serial.print(", ");
