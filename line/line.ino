@@ -1,45 +1,39 @@
 #include "JMDlib.h"
 #include "line.h"
-
+#define RED 0
+#define BLUE 1
 // 扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 // 这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
-int isRedTeam = 0; // 红蓝方信息数值为1时为红方出发
-bool WG = false;
-int program = 0;
+int team; // 红蓝方信息数值为1时为红方出发
+int color, id[2] = {1, 2};
 // 通过手动转动左或者右马达后，启动机器，完成机器选择红蓝方启动的过程
 void selectRG()
 {
-  if (getMotor4Code() > 200)
+  if (getMotor4Code() > 100)
   {
-    // 当左马达往前转，右马达后转各200个脉冲，表示红方出发，
-    newtone(1100, 80);
-    isRedTeam = 1;
-    EEPROM.write(10, isRedTeam); // 记录下当前选择
+    team = BLUE;
+    EEPROM.write(10, team); // 记录下当前选择
   }
-  else if (getMotor3Code() > 200)
+  else if (getMotor3Code() > 100)
+  {
+    team = RED;
+    EEPROM.write(10, team);
+  }
+  id[RED] = EEPROM.read(15);
+  id[BLUE] = EEPROM.read(16);
+  team = EEPROM.read(10); // 读取红蓝方信息
+  if (team == RED)
+  {
+    newtone(1100, 80);
+  }
+  else
   {
     // 当左马达后转，右马达前转各200个脉冲，表示蓝方出发
-    newtone(1100, 80);
+    newtone(900, 80);
+    delay(50);
+    newtone(600, 160);
     delay(50);
     newtone(1100, 80);
-    delay(50);
-    newtone(1100, 80);
-    isRedTeam = 0;
-    EEPROM.write(10, isRedTeam);
-  }
-
-  isRedTeam = EEPROM.read(10); // 读取红蓝方信息
-  if (getMotor4Code() < -200)
-  {
-    program = 2;
-    newtone(80, 60);
-  }
-  if (getMotor3Code() < -200)
-  {
-    program = 1;
-    newtone(80, 60);
-    delay(100);
-    newtone(80, 60);
   }
   resetPid();
 }
@@ -62,227 +56,100 @@ void wait_goods()
     if (R > 15 && G > 15 && B > 15)
     {
       if (R > B) // R大于B，被认为是红色货物
-        countR++;
+        countR++, color = RED;
       else // B大于R，被认为是蓝色货物
-        countB++;
+        countB++, color = BLUE;
+      break;
     }
-
-    if (countR > 20)
+    if (!getKey()) // 运行中按下了按键, 设置盒子编号
     {
-      WG = false;
-      return;
-    }
-
-    if (countB > 20)
-    {
-      WG = true;
-      return;
+      id[team] = (id[team] + 1) % 4; // 编号从 1 ~ 4 递增
+      EEPROM.write(15, id[0]);
+      EEPROM.write(16, id[1]);
+      if (team == RED)
+      {
+        newtone(1100, 80);
+      }
+      else
+      {
+        // 当左马达后转，右马达 前转各200个脉冲，表示蓝方出发
+        newtone(900, 80);
+        delay(50);
+        newtone(600, 160);
+        delay(50);
+        newtone(1100, 80);
+      }
+      delay(200);
+      for (int i = 0; i < id[team] + 1; i++)
+      {
+        newtone(400 + i * 30, 120);
+        delay(30);
+      }
     }
   }
 }
-// 舵机初始位置(准备获取货物位置)，需要实测更改角度
-void load_goods()
-{
-  setservo(4, 80);
-  delay(800);
-}
-// 舵机卸货角度，需要实测
-void unload_goods()
-{
-  setservo(4, 110);
-  delay(800);
-}
 
-// 红色区出发，到红方食物区卸货
-void red_food()
+void send(int number, int team)
 {
-
-  goline(1);           // 巡线1条横线
-  turn_right();        // 右转
-  goline(6);           // 巡线4条线
-  turn_left();         // 左转
-  goline(2);           // 巡线2条线
+  gocode(700, 30, 30); // 根据上边后退的状态，给相应速度让机器先越过蓝色区域,接上循环
+  goline(2);           // 巡线1条横线
+  if (number != 0)
+  {
+    if (team == RED)
+      turn_right();
+    else
+      turn_left();
+    goline(2 * number);
+    if (team == BLUE)
+      turn_right();
+    else
+      turn_left();
+    goline(1);
+  }
+  else
+    goline(2);
   golinecode(650);     // 编码巡线走450的距离
   gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  unload_goods();      // 卸货
-  delay(1000);
-  load_goods(); // 恢复接货状态
-  gocode(-20, 20, 200);
-  Turn(-20, 20, 2); // 原地转180°掉头
-  golinecode(400);  // 用编码前进一点距离，越过第一个路口
-  goline(2);
-  turn_right();
-  goline(6);
-  turn_left();
-  goline(1);
-  gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
-  delay(1000);
-  gocode(1000, 15, -15); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
-  gocode(600, -20, -20); // 然后让机器后退一定距离
-  gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  wait_goods();          // 等待货物
-  gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过红色区域,接上循环
-}
-// 红方饮料区卸货
-void red_drink()
-{
-  goline(1);           // 巡线1条横线
-  turn_right();        // 右转
-  goline(4);           // 巡线4条线
-  turn_left();         // 左转
-  goline(2);           // 巡线2条线
-  golinecode(650);     // 编码巡线走450的距离
-  gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  unload_goods();      // 卸货
-  delay(1000);
-  load_goods(); // 恢复接货状态
 
-  Turn(-20, 20, 2); // 原地转180°掉头
-  golinecode(400);  // 用编码前进一点距离，越过第一个路口
-  goline(2);
-  turn_right();
-  goline(4);
-  turn_left();
-  goline(1);
-  gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
-  delay(1000);
-  gocode(1000, 15, -15); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
-  gocode(600, -20, -20); // 然后让机器后退一定距离
-  gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  wait_goods();          // 等待货物
-  gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过红色区域,接上循环
-}
-// 蓝方方食物区卸货
-void blue_food()
-{
+  setservo(4, 110); // 卸货
+  delay(500);
+  setservo(4, 75); // 恢复接货状态
 
-  goline(2); // 巡线2条横线
-  turn_left();
-  goline(6);
-  turn_right();
-  goline(1);
-  golinecode(650);     // 编码巡线走450的距离
-  gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  unload_goods();      // 卸货
-  delay(1000);
-  load_goods(); // 恢复接货状态
-
-  Turn(-20, 20, 3); // 原地转180°掉头
+  Turn(-30, 30, 2); // 原地转180°掉头
   golinecode(400);  // 用编码前进一点距离，越过第一个路口
   goline(1);
-  turn_left();
-  goline(6);
-  turn_right();
-  goline(2);
-
+  if (number != 0)
+  {
+    if (team == RED)
+      turn_right();
+    else
+      turn_left();
+    goline(2 * number);
+    if (team == BLUE)
+      turn_right();
+    else
+      turn_left();
+    goline(2);
+  }
+  else
+    goline(3);
   gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
-  delay(1000);
-  gocode(1000, 15, -15); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
+  delay(100);
+  gocode(950, 30, -30);  // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
   gocode(600, -20, -20); // 然后让机器后退一定距离
   gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  wait_goods();          // 等待货物
-  gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过蓝色区域,接上循环
-}
-// 蓝方方饮料区卸货
-void blue_drink()
-{
-  goline(2); // 巡线1条横线
-  turn_left();
-  goline(4);
-  turn_right();
-  goline(1);
-  golinecode(650);     // 编码巡线走450的距离
-  gotime(300, 20, 20); // 再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
-  unload_goods();      // 卸货
-  delay(1000);
-  load_goods(); // 恢复接货状态
-
-  Turn(-20, 20, 2); // 原地转180°掉头
-  golinecode(400);  // 用编码前进一点距离，越过第一个路口
-  goline(1);
-  turn_left();
-  goline(4);
-  turn_right();
-  goline(2);
-
-  gocode(550, 20, 20); // 这里处理需要仔细调试，先向前走550距离
-  delay(1000);
-  gocode(1000, 15, -15); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  delay(2000);           // 这时我的处理方式是让机器角度稍微偏向左边向外，
-  gocode(600, -20, -20); // 然后让机器后退一定距离
-  gotime(600, -20, -20); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
-  wait_goods();          // 等待货物
-  gocode(700, 30, 25);   // 根据上边后退的状态，给相应速度让机器先越过蓝色区域,接上循环
 }
 // 程序开始
 void setup()
 {
   initLine();
-  selectRG();   // 选择红蓝方程序
-  load_goods(); // 进入等待获取货物状态
-  // 先检测是红方还是蓝方
-  for (int i = 0; i < 10; i++)
+  selectRG();      // 选择红蓝方程序
+  setservo(4, 75); // 进入等待获取货物状态
+  for (int i = 0; i < 999; i++)
   {
-    wait_goods();        // 等待第一个货物
-    gocode(700, 30, 30); // 先用左右马达各 30 的速度走 700 个编码脉冲，离开红蓝色区域，此处为开始
-    if (isRedTeam)
-    {
-      if (program == 1)
-      {
-        // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
-        red_food();
-      }
-      else if (program == 2)
-      {
-        // 这里控制红方开始程序直接运行程序1,颜色传感器只检测是否装货物
-        red_drink();
-      }
-    }
-    else
-    {
-      if (program == 1)
-      {
-        // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
-        blue_food();
-      }
-      else if (program == 2)
-      {
-        // 这里控制蓝方开始程序直接运行程序1,颜色传感器只检测是否装货物
-        blue_drink();
-      }
-    }
+    wait_goods();
+    send(id[color], team);
   }
 }
 
-void loop()
-{
-  // if (isRedTeam)
-  // {
-  //   if (WG == false)
-  //   {
-  //     setRGB(0);
-  //     red_food(); // 去红方食物区
-  //   }
-  //   else
-  //   {
-  //     setRGB(2);
-  //     red_drink(); // 去红方饮料区
-  //   }
-  // }
-  // else
-  // {
-  //   if (WG == false)
-  //   {
-  //     setRGB(0);
-  //     blue_food(); // 去红方食物区
-  //   }
-  //   else
-  //   {
-  //     setRGB(2);
-  //     blue_drink(); // 去蓝方食物区
-  //   }
-  // }
-}
+void loop() {}

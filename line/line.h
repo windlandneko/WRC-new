@@ -330,7 +330,7 @@ void Event()
 }
 void waitStart()
 {
-  tone(9, 66, 30); //巡线过程中，不可调用tone控制发声
+  tone(9, 514, 50); //巡线过程中，不可调用tone控制发声
 }
 //查看光电状态
 void see()
@@ -371,36 +371,36 @@ void see()
       setRGB(7);
     }
 
-    Serial.print(ADC_TD[0]);
-    Serial.print(",");
-    Serial.print(ADC_TD[1]);
-    Serial.print(",");
-    Serial.print(ADC_TD[2]);
-    Serial.print(",");
-    Serial.print(ADC_TD[3]);
-    Serial.print(",");
-    Serial.print(ADC_TD[4]);
-    Serial.print("---");
+    // Serial.print(ADC_TD[0]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[1]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[2]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[3]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[4]);
+    // Serial.print("---");
 
-    Serial.print(a_state[0]);
-    Serial.print(",");
-    Serial.print(a_state[1]);
-    Serial.print(",");
-    Serial.print(a_state[2]);
-    Serial.print(",");
-    Serial.print(a_state[3]);
-    Serial.print(",");
-    Serial.println(a_state[4]);
+    // Serial.print(a_state[0]);
+    // Serial.print(",");
+    // Serial.print(a_state[1]);
+    // Serial.print(",");
+    // Serial.print(a_state[2]);
+    // Serial.print(",");
+    // Serial.print(a_state[3]);
+    // Serial.print(",");
+    // Serial.println(a_state[4]);
 
-    Serial.print(avar[0]);
-    Serial.print(",");
-    Serial.print(avar[1]);
-    Serial.print(",");
-    Serial.print(avar[2]);
-    Serial.print(",");
-    Serial.print(avar[3]);
-    Serial.print(",");
-    Serial.println(avar[4]);
+    // Serial.print(avar[0]);
+    // Serial.print(",");
+    // Serial.print(avar[1]);
+    // Serial.print(",");
+    // Serial.print(avar[2]);
+    // Serial.print(",");
+    // Serial.print(avar[3]);
+    // Serial.print(",");
+    // Serial.println(avar[4]);
     delay(100);
   }
 
