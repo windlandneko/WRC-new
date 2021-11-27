@@ -344,7 +344,7 @@ int getSliderPin(uint8_t pin);         //读取滑杆电阻输入
 
 void setServoPin(uint8_t pin, uint8_t angle); //设置舵机输出角度
 void servo(int servoPin, int angle);
-void setMusic();                                  //设置音乐输出（歌曲：葫芦娃）
+void setMusic(int aa);                                  //设置音乐输出（歌曲：葫芦娃）
 void setMusicOUT(int _tune[], float _duration[]); //设置自定义音乐输出
 void setMusicOUT(int _tune, float _duration);
 void setBeep(uint8_t turn);                 //设置板载蜂鸣器输出

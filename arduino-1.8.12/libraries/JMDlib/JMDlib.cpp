@@ -1216,7 +1216,12 @@ int tune[] =
 		TONE_D5, TONE_D6, TONE_D6, TONE_0, TONE_D5, TONE_D1, TONE_D2, TONE_0, TONE_D3, TONE_D3, TONE_D1, TONE_DL6,
 		TONE_D1, TONE_D3, TONE_D5, TONE_D6, TONE_D6, TONE_D3, TONE_D5, TONE_D6, TONE_D6, TONE_DH1, TONE_0, TONE_D7,
 		TONE_D5, TONE_D6}; // 这部分就是整首曲子的音符部分
-
+int pig[] =
+	{
+		TONE_CH5, TONE_CH3, TONE_CH1, TONE_CH2, TONE_C5, TONE_0, TONE_C5, TONE_C7, TONE_CH2, TONE_CH4, TONE_CH3, TONE_CH1};
+float pigdur[] =
+	{ // 5    3    1  2    5    x    5    7    2    4  3  1
+		1, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 1};
 float duration[] =
 	{
 		1, 1, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 0.5, 1, 0.5, 0.5,
@@ -1234,17 +1239,26 @@ float duration[] =
 int length; // 这里定义一个变量，后面用来表示共有多少个音符
 
 /****默认音乐输出****/
-void setMusic()
+void setMusic(int aa)
 {
 
 	pinMode(tonePin, OUTPUT); // 设置蜂鸣器的pin为输出模式
-
-	length = sizeof(tune) / sizeof(tune[0]); // 这里用sizeof，可以查出tone序列里有多少个音符
-	for (int i = 0; i < length; i++)		 // 循环音符的次数
+	int f1, f2;
+	if(aa == 0) {
+		f1 = 0;
+		f2 = 4;
+	}
+	else {
+		f1 = 6;
+		f2 = 11;
+	}
+	length = sizeof(pig) / sizeof(pig[0]); // 这里用sizeof，可以查出tone序列里有多少个音符
+	for (int i = f1; i <= f2; i++)		 // 循环音符的次数
 	{
-		tone(tonePin, tune[i]);	  // 此函数依次播放tune序列里的数组，即每个音符
-		delay(400 * duration[i]); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+		tone(tonePin, pig[i]);	  // 此函数依次播放tune序列里的数组，即每个音符
+		delay(150 * pigdur[i]); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
 		noTone(tonePin);		  // 停止当前音符，进入下一音符
+		delay(50 * pigdur[i]);
 	}
 }
 
@@ -1255,28 +1269,28 @@ void setMusic()
  */
 void setMusicOUT(int _tune[], float _duration[])
 {
-	// pinMode(tonePin,OUTPUT);// 设置蜂鸣器的pin为输出模式
+	pinMode(tonePin,OUTPUT);// 设置蜂鸣器的pin为输出模式
 
-	// length = sizeof(_tune)/sizeof(_tune[0]);// 这里用sizeof，可以查出tone序列里有多少个音符
-	// for(int x=0; x<length; x++)// 循环音符的次数
-	// {
-	// 	tone(tonePin,_tune[x]);// 此函数依次播放tune序列里的数组，即每个音符
-	// 	delay(400*_duration[x]);// 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
-	// 	noTone(tonePin);// 停止当前音符，进入下一音符
-	// }
+	length = sizeof(_tune)/sizeof(_tune[0]);// 这里用sizeof，可以查出tone序列里有多少个音符
+	for(int x=0; x<length; x++)// 循环音符的次数
+	{
+		tone(tonePin,_tune[x]);// 此函数依次播放tune序列里的数组，即每个音符
+		delay(400*_duration[x]);// 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+		noTone(tonePin);// 停止当前音符，进入下一音符
+	}
 }
 /*
  *_tune:曲调
  *_duration: 节拍
  */
-void setMusicOUT(int _tune, float _duration)
-{
-	pinMode(tonePin, OUTPUT); // 设置蜂鸣器的pin为输出模式
+// void setMusicOUT(int _tune, float _duration)
+// {
+// 	pinMode(tonePin, OUTPUT); // 设置蜂鸣器的pin为输出模式
 
-	tone(tonePin, _tune);	// 此函数依次播放tune序列里的数组，即每个音符
-	delay(400 * _duration); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
-	noTone(tonePin);		// 停止当前音符，进入下一音符
-}
+// 	tone(tonePin, _tune);	// 此函数依次播放tune序列里的数组，即每个音符
+// 	delay(400 * _duration); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+// 	noTone(tonePin);		// 停止当前音符，进入下一音符
+// }
 
 /****Beep蜂鸣器****/
 /*
