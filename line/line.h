@@ -90,22 +90,22 @@ void line(int speed)
   }
   else if (S3 && S2)
   {
-    set_2Motor(speed * 0.9, speed);
+    set_2Motor(speed * 0.8, speed);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(speed, speed * 0.9);
+    set_2Motor(speed, speed * 0.8);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(speed * 0.5, speed);
+    set_2Motor(speed * 0.4, speed);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(speed, speed * 0.5);
+    set_2Motor(speed, speed * 0.4);
     g_linestate = 4;
   }
   else
