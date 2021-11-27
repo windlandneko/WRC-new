@@ -457,6 +457,7 @@ void scan()
   tone(9, 440, 100);
   delay(200);
 }
+
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
 void initLine()
@@ -480,8 +481,13 @@ void initLine()
   M4PID.SetOutputLimits(-255, 255);
   setRGB(7);
   see();
+  // initangle();
   inittimer();
-
+  // unsigned long tm = millis();
+  // ......
+  // tm = millis() - tm;
+  // 毫秒 micros();
+  // 微秒 millis();
   ADC_TD[0] = EEPROM.read(1) * 4;
   ADC_TD[1] = EEPROM.read(2) * 4;
   ADC_TD[2] = EEPROM.read(3) * 4;
