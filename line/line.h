@@ -81,42 +81,42 @@ void getState()
   S4 = analogRead(A4) < ADC_TD[3];
   S5 = analogRead(A5) < ADC_TD[4];
 }
-void line(int sp = 35)
+void line(int speed)
 {
   getState();
   if ((S3 && !S2 && !S4) || (S3 && S2 && S4))
   {
-    set_2Motor(sp, sp);
+    set_2Motor(speed, speed);
   }
   else if (S3 && S2)
   {
-    set_2Motor(sp * 0.8, sp);
+    set_2Motor(speed * 0.9, speed);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(sp, sp * 0.8);
+    set_2Motor(speed, speed * 0.9);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(sp * 0.4, sp);
+    set_2Motor(speed * 0.5, speed);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(sp, sp * 0.4);
+    set_2Motor(speed, speed * 0.5);
     g_linestate = 4;
   }
   else
   {
     if (g_linestate == 2)
     {
-      set_2Motor(-2, sp);
+      set_2Motor(-2, speed);
     }
     else
     {
-      set_2Motor(sp, -2);
+      set_2Motor(speed, -2);
     }
   }
   if (S1)
@@ -124,14 +124,15 @@ void line(int sp = 35)
   if (S5)
     g_linestate = 4;
 }
+
 //时间循迹，单位ms
-void golineTime(long time, int sp = 35)
+void golineTime(long time, int speed = 35)
 {
   unsigned long T1 = millis();
   while (millis() - T1 < time)
   {
     getState();
-    line(sp);
+    line(speed);
   }
 }
 //走编码，code为要走的编码脉冲数，spL左马达速度，spR右马达速度，LR=0左马达编码到达code退出
@@ -170,7 +171,7 @@ void gotime(int time, int spL, int spR)
   set_2Motor(0, 0);
 }
 //编码巡线
-void golinecode(long code, int sp = 35, int LR = 0)
+void golinecode(long code, int speed = 35, int LR = 0)
 {
   // resetPid();
   long m3c = getMotor3Code();
@@ -178,7 +179,7 @@ void golinecode(long code, int sp = 35, int LR = 0)
   while (1)
   {
     getState();
-    line(sp);
+    line(speed);
     if (LR == 0)
     {
       if (abs(getMotor3Code() - m3c) >= code)
@@ -199,38 +200,34 @@ void golinecode(long code, int sp = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int count, int sp = 35, int lineSensor = 15)
+void goline(int total_line, int speed = 35, int trytime = -1, int lineSensor = 15)
 {
-
   unsigned long T1 = 0, T5 = 0;
-  int m_count = 0;
+  int count = 0;
   while (1)
   {
     getState();
 
     if (S1)
-    {
       T1 = millis();
-    }
     if (S5)
-    {
       T5 = millis();
-    }
     if (lineSensor == 15)
     {
-      if ((T1 > 0 && T5 > 0) && abs(T1 - T5) < 200)
+      if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 200) // 到达一根线了~
       {
-        m_count++;
-        if (m_count < count)
+        count++; //
+        if (count < total_line)
         {
           while (S1 || S5)
           {
             getState();
-            line(sp);
+            line(speed);
+            if (millis() - T1 >= trytime && trytime != -1)
+              break;
           }
-          golineTime(300, sp);
-          T1 = 0;
-          T5 = 0;
+          golineTime(300, speed);
+          T1 = T5 = 0;
         }
         else
         {
@@ -243,13 +240,15 @@ void goline(int count, int sp = 35, int lineSensor = 15)
     {
       if (S1)
       {
-        if (m_count < count)
+        if (count < total_line)
         {
-          m_count++;
+          count++;
           while (S1)
           {
             getState();
-            line(sp);
+            line(speed);
+            if (millis() - T1 >= trytime && trytime != -1)
+              break;
           }
         }
         else
@@ -263,13 +262,15 @@ void goline(int count, int sp = 35, int lineSensor = 15)
     {
       if (S5)
       {
-        if (m_count < count)
+        if (count < total_line)
         {
-          m_count++;
+          count++;
           while (S5)
           {
             getState();
-            line(sp);
+            line(speed);
+            if (millis() - T5 >= trytime && trytime != -1)
+              break;
           }
         }
         else
@@ -279,10 +280,10 @@ void goline(int count, int sp = 35, int lineSensor = 15)
         }
       }
     }
-    line(sp);
+    line(speed);
   }
   set_2Motor(0, 0);
-  beep();
+  // beep();
 }
 //光电转弯，spL，spR左右马速度，sensor为遇线停的光电
 void Turn(int spL, int spR, int sensor)
@@ -330,7 +331,7 @@ void Event()
 }
 void waitStart()
 {
-  tone(9, 514, 50); //巡线过程中，不可调用tone控制发声
+  tone(9, TONE_CH3, 40); //巡线过程中，不可调用tone控制发声
 }
 //查看光电状态
 void see()
@@ -341,7 +342,7 @@ void see()
   ADC_TD[3] = EEPROM.read(4) * 4;
   ADC_TD[4] = EEPROM.read(5) * 4;
 
-  FlexiTimer2::set(600, 1.0 / 1000, waitStart); //  500代表500次计数 ， 1.0/1000表示分辨率是1ms  ，Event代表的是你的回调函数
+  FlexiTimer2::set(1000, 1.0 / 1000, waitStart); //  500代表500次计数 ， 1.0/1000表示分辨率是1ms  ，Event代表的是你的回调函数
   FlexiTimer2::start();                         //开启定时器
   while (getKey())
   {
