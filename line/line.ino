@@ -91,7 +91,9 @@ void send(int number, int team, int line = 3)
       turn_right();
     else
       turn_left();
-    goline(4 - line, 45);
+    goline(5 - line, 40);
+    // if(line <= 2)
+    //   goline(1, 40);
     goline(1, 20, 2000);
   }
   else // number == 0
@@ -131,9 +133,9 @@ void send(int number, int team, int line = 3)
   // Turn(35, -35, 2);
 
   gocode(550, 45, 45);   // 这里处理需要仔细调试，先向前走550距离
-  gocode(800, 45, -45);  // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  gocode(600, -20, -20); // 然后让机器后退一定距离
-  gotime(400, -30, -30); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
+  gocode(1200, 40, -40);  // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
+  gocode(300, -40, -40); // 然后让机器后退一定距离
+  gotime(200, -30, -30); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
 }
 // 程序开始
 void setup()
@@ -148,7 +150,7 @@ void setup()
   for (int i = 0; i < 999; i++)
   {
     wait_goods();
-    send(id[color], team, id[color] + 1);
+    send(id[color], team, id[BLUE] + 1);
   }
 }
 
