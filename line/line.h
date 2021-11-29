@@ -1,8 +1,9 @@
+// #include "NewPing.h"
 #include "pid.h"
 int S1, S2, S3, S4, S5;
 int g_linestate = 0;
 int ADC_TD[5] = {0, 0, 0, 0, 0};
-
+// NewPing dis(43, 42); // Trigger pin; Echo pin
 int ccount = 0;
 int isbeep = 0;
 int beepcount = 0;
@@ -90,22 +91,22 @@ void line(int speed)
   }
   else if (S3 && S2)
   {
-    set_2Motor(speed * 0.8, speed);
+    set_2Motor(speed * 0.9, speed);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(speed, speed * 0.8);
+    set_2Motor(speed, speed * 0.9);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(speed * 0.4, speed);
+    set_2Motor(speed * 0.6, speed);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(speed, speed * 0.4);
+    set_2Motor(speed, speed * 0.6);
     g_linestate = 4;
   }
   else
@@ -200,10 +201,10 @@ void golinecode(long code, int speed = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int total_line, int speed = 35, int trytime = -1, int lineSensor = 15)
+void goline(int total_line, int speed = 35, bool detectDis = false, int lineSensor = 15)
 {
   unsigned long T1 = 0, T5 = 0;
-  int count = 0;
+  int count = 0, distance;
   while (1)
   {
     getState();
@@ -214,7 +215,7 @@ void goline(int total_line, int speed = 35, int trytime = -1, int lineSensor = 1
       T5 = millis();
     if (lineSensor == 15)
     {
-      if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 200) // 到达一根线了~
+      if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 400) // 到达一根线了~
       {
         count++; //
         if (count < total_line)
@@ -223,8 +224,10 @@ void goline(int total_line, int speed = 35, int trytime = -1, int lineSensor = 1
           {
             getState();
             line(speed);
-            if (millis() - T1 >= trytime && trytime != -1)
-              break;
+            // distance = dis.ping();
+            // Serial.println(distance);
+            // if (distance >= 3 && distance <= 100)
+            //   return;
           }
           golineTime(300, speed);
           T1 = T5 = 0;
@@ -247,8 +250,6 @@ void goline(int total_line, int speed = 35, int trytime = -1, int lineSensor = 1
           {
             getState();
             line(speed);
-            if (millis() - T1 >= trytime && trytime != -1)
-              break;
           }
         }
         else
@@ -269,8 +270,6 @@ void goline(int total_line, int speed = 35, int trytime = -1, int lineSensor = 1
           {
             getState();
             line(speed);
-            if (millis() - T5 >= trytime && trytime != -1)
-              break;
           }
         }
         else
@@ -333,6 +332,45 @@ void waitStart()
 {
   tone(9, TONE_CH3, 40); //巡线过程中，不可调用tone控制发声
 }
+
+void checkw()
+{
+  while (!getKey())
+    ;
+  unsigned long turntime;
+  set_2Motor(50, -50);
+  getState();
+  while (!S3)
+  {
+    getState();
+  }
+  turntime = micros();
+  delay(100);
+  getState();
+  while (!S3)
+  {
+    getState();
+  }
+  delay(100);
+  getState();
+  while (!S3)
+  {
+    getState();
+  }
+  turntime = micros() - turntime;
+  set_2Motor(0, 0);
+  Serial.println(turntime);
+  unsigned long time = turntime / 1000; //旋转180°时间；
+  newtone(1200, 100);
+  EEPROM.write(20, time);
+  delay(700);
+  gotime(time, 50, -50);
+  newtone(1500, 100);
+  delay(700);
+  gotime(time, -50, 50);
+  newtone(1500, 100);
+}
+
 //查看光电状态
 void see()
 {
@@ -342,8 +380,8 @@ void see()
   ADC_TD[3] = EEPROM.read(4) * 4;
   ADC_TD[4] = EEPROM.read(5) * 4;
 
-  FlexiTimer2::set(1000, 1.0 / 1000, waitStart); //  500代表500次计数 ， 1.0/1000表示分辨率是1ms  ，Event代表的是你的回调函数
-  FlexiTimer2::start();                         //开启定时器
+  FlexiTimer2::set(2000, waitStart); //  500代表500次计数 ， 1.0/1000表示分辨率是1ms  ，Event代表的是你的回调函数
+  FlexiTimer2::start();              //开启定时器
   while (getKey())
   {
     int avar[5] = {0, 0, 0, 0, 0};
@@ -404,8 +442,16 @@ void see()
     // Serial.println(avar[4]);
     delay(100);
   }
-
   FlexiTimer2::stop();
+  // delay(1000);
+  // if(!getKey())
+  // {
+  //   FlexiTimer2::start();
+  //   while(getKey())
+  //     ;
+  //   checkw();
+  //   FlexiTimer2::stop();
+  // }
 }
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会右短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序

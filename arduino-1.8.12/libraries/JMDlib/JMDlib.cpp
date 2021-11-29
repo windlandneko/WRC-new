@@ -1256,9 +1256,9 @@ void setMusic(int aa)
 	for (int i = f1; i <= f2; i++)		 // 循环音符的次数
 	{
 		tone(tonePin, pig[i]);	  // 此函数依次播放tune序列里的数组，即每个音符
-		delay(150 * pigdur[i]); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
+		delay(120 * pigdur[i]); // 每个音符持续的时间，即节拍duration，400是调整时间的越大，曲子速度越慢，越小曲子速度越快，自己掌握吧
 		noTone(tonePin);		  // 停止当前音符，进入下一音符
-		delay(50 * pigdur[i]);
+		delay(30 * pigdur[i]);
 	}
 }
 
