@@ -85,7 +85,7 @@ void send(int number, int team, int line = 3)
     goline(5 - line, 40); // (line == 4 ? 40 : 50)
   }
   else
-    gocode(100, 50, 50);
+    gocode(60, 50, 50);
   if (number != 0)
   {
     turn(team == RED);
