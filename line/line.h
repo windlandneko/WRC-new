@@ -70,7 +70,7 @@ void pid()
 void inittimer()
 {
   FlexiTimer2::set(ms, pid); //  ms代表ms次计数 ， 1.0/1000表示分辨率是1ms  ，pid代表的是你的回调函数
-  FlexiTimer2::start();                  //开启定时器
+  FlexiTimer2::start();      //开启定时器
 }
 
 //获得5个光电的状态值
@@ -201,88 +201,28 @@ void golinecode(long code, int speed = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int total_line, int speed = 50, bool detectDis = false, int lineSensor = 15)
+void goline(int total_line, int speed = 60, int endtime = -1)
 {
-  unsigned long T1 = 0, T5 = 0;
-  int count = 0, distance;
-  while (1)
+  unsigned long T1 = 0, T5 = 0, T = millis();
+  int count = 0;
+  while (endtime == -1 || micros() - T < endtime)
   {
     getState();
-
-    if (S1)
-      T1 = millis();
-    if (S5)
-      T5 = millis();
-    if (lineSensor == 15)
+    T1 = (S1 ? millis() : T1);
+    T5 = (S5 ? millis() : T5);
+    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 800) // 到达一根线了~
     {
-      if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 400) // 到达一根线了~
-      {
-        count++; //
-        if (count < total_line)
-        {
-          while (S1 || S5)
-          {
-            getState();
-            line(speed);
-            // distance = dis.ping();
-            // Serial.println(distance);
-            // if (distance >= 3 && distance <= 100)
-            //   return;
-          }
-          golineTime(300, speed);
-          T1 = T5 = 0;
-        }
-        else
-        {
-          set_2Motor(0, 0);
-          break;
-        }
-      }
-    }
-    if (lineSensor == 1)
-    {
-      if (S1)
-      {
-        if (count < total_line)
-        {
-          count++;
-          while (S1)
-          {
-            getState();
-            line(speed);
-          }
-        }
-        else
-        {
-          set_2Motor(0, 0);
-          break;
-        }
-      }
-    }
-    if (lineSensor == 5)
-    {
-      if (S5)
-      {
-        if (count < total_line)
-        {
-          count++;
-          while (S5)
-          {
-            getState();
-            line(speed);
-          }
-        }
-        else
-        {
-          set_2Motor(0, 0);
-          break;
-        }
-      }
+      T1 = T5 = 0; // 重置定时
+      count++;     // 走完一根线了
+      if (count >= total_line)
+        break;
+      while ((S1 || S5) && (endtime == -1 || micros() - T < endtime))
+        line(speed);
+      golineTime(300, speed);
     }
     line(speed);
   }
   set_2Motor(0, 0);
-  // beep();
 }
 //光电转弯，spL，spR左右马速度，sensor为遇线停的光电
 void Turn(int spL, int spR, int sensor)
@@ -509,6 +449,13 @@ void scan()
 void init_light_sensor()
 {
   Serial.begin(115200);
+  Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
+  Serial.print("啊这... 这个车平均送一次货需要 ");
+  Serial.print((EEPROM.read(45) * 256 + EEPROM.read(44)) / 1000);
+  Serial.print(".");
+  Serial.print((EEPROM.read(45) * 256 + EEPROM.read(44)) % 1000);
+  Serial.println(" 秒.");
+  Serial.println("真是太屑了! 就不能再快点吗??");
   pinMode(4, OUTPUT);
   pinMode(9, OUTPUT);
   getMotor3Code();
