@@ -5,9 +5,9 @@
 // 扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 // 这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
 int team, halftime; // 红蓝方信息数值为1时为红方出发
-int color, id[2] = {1, 2};
+int color, box_id[2] = {3, 4};
 // 通过手动转动左或者右马达后，启动机器，完成机器选择红蓝方启动的过程
-void selectRG()
+void team_select()
 {
   if (getMotor4Code() > 100)
     team = BLUE;
@@ -22,10 +22,9 @@ void turn_left() { Turn(-45, 45, 2); }
 // 右转
 void turn_right() { Turn(45, -45, 4); }
 // 等待检测货物状态
-void wait_goods()
+bool wait_goods()
 {
-  int countR = 0, countB = 0;
-  int R = 0, G = 0, B = 0;
+  int R, G, B;
   resetPid();
   while (true)
   {
@@ -34,24 +33,15 @@ void wait_goods()
     B = getColorSensorPin(0, 8); // 获得颜色传感器B蓝色分量
     // 当数所有值大于15被认为已装货
     if (R > 15 && G > 15 && B > 15)
-    {
-      if (R > B) // R大于B，被认为是红色货物
-        countR++, color = RED;
-      else // B大于R，被认为是蓝色货物
-        countB++, color = BLUE;
-      break;
-    }
+      return B > R;
     if (!getKey()) // 运行中按下了按键, 设置盒子编号
     {
-      id[team] = (id[team] + 1) % 4; // 编号从 1 ~ 4 递增
-      EEPROM.write(15, id[0]);
-      EEPROM.write(16, id[1]);
-      if (team == RED)
-        newtone(TONE_CH1, 120);
-      else // team == BLUE
-        newtone(TONE_CH2, 120);
-      delay(30);
-      switch (id[team])
+      box_id[team]++ %= 4; // 编号从 1 ~ 4 递增
+      EEPROM.write(15, box_id[0]);
+      EEPROM.write(16, box_id[1]);
+      newtone((team == RED ? TONE_CH1 : TONE_CH3), 120);
+      delay(50);
+      switch (box_id[team])
       {
       case 0:
         newtone(TONE_C1, 50);
@@ -143,19 +133,26 @@ void send(int number, int team, int line = 3)
 void setup()
 {
   setMusic(0); // 播放美妙的音乐
-  initLine();
+
+  // 读取信息
   halftime = EEPROM.read(20);
-  id[RED] = EEPROM.read(15);
-  id[BLUE] = EEPROM.read(16);
-  team = EEPROM.read(10); // 读取红蓝方信息
-  selectRG();             // 选择红蓝方程序
+  box_id[RED] = EEPROM.read(15);
+  box_id[BLUE] = EEPROM.read(16);
+  team = EEPROM.read(10);
+
+  init_light_sensor();
+  team_select();             // 选择红蓝方程序
+
   delay(200);
   setMusic(1);     // 播放美妙的音乐
+
   setservo(4, 70); // 进入等待获取货物状态
-  for (int i = 0; i < 999; i++)
+
+  unsigned long clock = micros();
+  for (int i = 0; i < 15; i++)
   {
     wait_goods();
-    send(id[color], team, id[BLUE] + 1);
+    send(box_id[color], team, box_id[BLUE] + 1);
   }
 }
 

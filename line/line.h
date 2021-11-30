@@ -69,7 +69,7 @@ void pid()
 }
 void inittimer()
 {
-  FlexiTimer2::set(ms, 1.0 / 1000, pid); //  ms代表ms次计数 ， 1.0/1000表示分辨率是1ms  ，pid代表的是你的回调函数
+  FlexiTimer2::set(ms, pid); //  ms代表ms次计数 ， 1.0/1000表示分辨率是1ms  ，pid代表的是你的回调函数
   FlexiTimer2::start();                  //开启定时器
 }
 
@@ -506,34 +506,29 @@ void scan()
 
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
-void initLine()
+void init_light_sensor()
 {
   Serial.begin(115200);
   pinMode(4, OUTPUT);
   pinMode(9, OUTPUT);
   getMotor3Code();
   getMotor4Code();
-  if (!getKey())
-  {
+  if (!getKey()) // 校准光电
     scan();
-  }
 
   M3PID.SetMode(AUTOMATIC);   //设置PID为自动模式
   M3PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
+  M3PID.SetOutputLimits(-255, 255);
+
   M4PID.SetMode(AUTOMATIC);   //设置PID为自动模式
   M4PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
-
-  M3PID.SetOutputLimits(-255, 255);
   M4PID.SetOutputLimits(-255, 255);
+
   setRGB(7);
   see();
-  // initangle();
+
   inittimer();
-  // unsigned long tm = millis();
-  // ......
-  // tm = millis() - tm;
-  // 毫秒 micros();
-  // 微秒 millis();
+
   ADC_TD[0] = EEPROM.read(1) * 4;
   ADC_TD[1] = EEPROM.read(2) * 4;
   ADC_TD[2] = EEPROM.read(3) * 4;
