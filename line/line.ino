@@ -18,9 +18,9 @@ void selectRG()
   resetPid();
 }
 // 左转
-void turn_left() { Turn(-15, 45, 2); }
+void turn_left() { Turn(-45, 45, 2); }
 // 右转
-void turn_right() { Turn(45, -15, 4); }
+void turn_right() { Turn(45, -45, 4); }
 // 等待检测货物状态
 void wait_goods()
 {
@@ -73,28 +73,28 @@ void wait_goods()
 void send(int number, int team, int line = 3)
 {
   gocode((line == 1 ? 300 : 800), 50, 50); // 给速度让机器先越过彩色区域
-  goline(line - 1, 50);
+  goline(line - 1);
   if (number != 0)
   {
     if (team == RED)
       turn_right();
     else
       turn_left();
-    goline(2 * number - (number == 4 ? 1 : 0), 50);
+    goline(2 * number);
     if (team == BLUE)
       turn_right();
     else
       turn_left();
-    goline(5 - line, 40);
-    // if(number == 4)
-    //   goline(1, 40);
-    goline(1, 20, true);
+    goline(5 - line);
+    // goline(1, 20, true);
+    golinecode(650);
+    gotime(300, 20, 20);
   }
   else // number == 0
   {
     if (line == 1)
       gocode(500, 40, 40);
-    goline(4, 45);
+    goline(4);
     goline(1, 20, true);
   }
   // golinecode(650);     // 编码巡线走一段距离
@@ -102,13 +102,13 @@ void send(int number, int team, int line = 3)
 
   setservo(4, 110); // 卸货
   delay(500);
-  setservo(4, 75); // 恢复接货
+  setservo(4, 70); // 恢复接货
 
   Turn(-50, 50, 2); // 原地转180°掉头
   if (line != 4)
   {
-    golinecode(750); // 用编码前进一点距离，越过第一个路口
-    goline(4 - line, (line == 4 ? 40 : 50));
+    golinecode(700);  // 用编码前进一点距离，越过第一个路口
+    goline(4 - line); // (line == 4 ? 40 : 50)
   }
   else
     gocode(50, 40, 40);
@@ -118,15 +118,15 @@ void send(int number, int team, int line = 3)
       turn_right();
     else
       turn_left();
-    goline(2 * number, 50);
+    goline(2 * number);
     if (team == BLUE)
       turn_right();
     else
       turn_left();
-    goline(line - 1, 50);
+    goline(line - 1);
   }
   else
-    goline(3, 40);
+    goline(3);
 
   // Turn(35, -35, 2);
   // Turn(35, -35, 2);
@@ -142,16 +142,16 @@ void send(int number, int team, int line = 3)
 // 程序开始
 void setup()
 {
-  // setMusic(0); // 播放美妙的音乐
+  setMusic(0); // 播放美妙的音乐
   initLine();
   halftime = EEPROM.read(20);
   id[RED] = EEPROM.read(15);
   id[BLUE] = EEPROM.read(16);
   team = EEPROM.read(10); // 读取红蓝方信息
   selectRG();             // 选择红蓝方程序
-  delay(300);
-  // setMusic(1);     // 播放美妙的音乐
-  setservo(4, 75); // 进入等待获取货物状态
+  delay(200);
+  setMusic(1);     // 播放美妙的音乐
+  setservo(4, 70); // 进入等待获取货物状态
   for (int i = 0; i < 999; i++)
   {
     wait_goods();

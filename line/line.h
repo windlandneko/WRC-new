@@ -91,22 +91,22 @@ void line(int speed)
   }
   else if (S3 && S2)
   {
-    set_2Motor(speed * 0.9, speed);
+    set_2Motor(speed - 5, speed);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(speed, speed * 0.9);
+    set_2Motor(speed, speed - 5);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(speed * 0.6, speed);
+    set_2Motor(speed - 15, speed);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(speed, speed * 0.6);
+    set_2Motor(speed, speed - 15);
     g_linestate = 4;
   }
   else
@@ -201,7 +201,7 @@ void golinecode(long code, int speed = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int total_line, int speed = 35, bool detectDis = false, int lineSensor = 15)
+void goline(int total_line, int speed = 50, bool detectDis = false, int lineSensor = 15)
 {
   unsigned long T1 = 0, T5 = 0;
   int count = 0, distance;

@@ -5,6 +5,13 @@
             "name": "Arduino",
             "compilerPath": "C:\\Users\\27636\\Desktop\\WRC\\arduino-1.8.12\\hardware\\tools\\avr\\bin\\avr-g++",
             "compilerArgs": [
+                "-u",
+                "--language-force=c++",
+                "-f",
+                "-",
+                "--c++-kinds=svpf",
+                "--fields=KSTtzns",
+                "--line-directives",
                 "-std=gnu++11",
                 "-fpermissive",
                 "-fno-exceptions",
