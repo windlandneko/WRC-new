@@ -2,6 +2,6 @@
     "configuration": "cpu=atmega2560",
     "board": "arduino:avr:mega",
     "sketch": "line\\line.ino",
-    "port": "COM5",
+    "port": "COM6",
     "output": "build"
 }
