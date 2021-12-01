@@ -150,12 +150,13 @@ void time_test(int line)
   delay(400);
   newtone(numbertone[(clock / 10) % 10], 800);
   delay(2000);
+  resetPid();
 }
 // 程序开始
 void setup()
 {
   setMusic(0); // 播放美妙的音乐
-  initLine();
+  init_light_sensor();
   halftime = EEPROM.read(20);
   id[RED] = EEPROM.read(15);
   id[BLUE] = EEPROM.read(16);

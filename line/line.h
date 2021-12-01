@@ -203,78 +203,22 @@ void golinecode(long code, int speed = 35, int LR = 0)
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
 void goline(int total_line, int speed = 85, int endtime = -1)
 {
-  unsigned long T1 = 0, T5 = 0;
-  int count = 0, distance;
-  while (1)
+  unsigned long T1 = 0, T5 = 0, T = millis();
+  int count = 0;
+  while (endtime == -1 || micros() - T < endtime)
   {
     getState();
     T1 = (S1 ? millis() : T1);
     T5 = (S5 ? millis() : T5);
     if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 400) // 到达一根线了~
     {
-      if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 400) // 到达一根线了~
-      {
-        count++; //
-        if (count < total_line)
-        {
-          while (S1 || S5)
-          {
-            getState();
-            line(speed);
-            // distance = dis.ping();
-            // Serial.println(distance);
-            // if (distance >= 3 && distance <= 100)
-            //   return;
-          }
-          golineTime(300, speed);
-          T1 = T5 = 0;
-        }
-        else
-        {
-          set_2Motor(0, 0);
-          break;
-        }
-      }
-    }
-    if (lineSensor == 1)
-    {
-      if (S1)
-      {
-        if (count < total_line)
-        {
-          count++;
-          while (S1)
-          {
-            getState();
-            line(speed);
-          }
-        }
-        else
-        {
-          set_2Motor(0, 0);
-          break;
-        }
-      }
-    }
-    if (lineSensor == 5)
-    {
-      if (S5)
-      {
-        if (count < total_line)
-        {
-          count++;
-          while (S5)
-          {
-            getState();
-            line(speed);
-          }
-        }
-        else
-        {
-          set_2Motor(0, 0);
-          break;
-        }
-      }
+      T1 = T5 = 0; // 重置定时
+      count++;     // 走完一根线了
+      if (count >= total_line)
+        break;
+      while ((S1 || S5) && (endtime == -1 || micros() - T < endtime))
+        line(speed);
+      golineTime(300, speed);
     }
     line(speed);
   }
@@ -501,34 +445,36 @@ void scan()
 
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
-void initLine()
+void init_light_sensor()
 {
   Serial.begin(115200);
+  Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
+  Serial.print("啊这... 这个车平均送一次货需要 ");
+  Serial.print((EEPROM.read(45) * 256 + EEPROM.read(44)) / 1000);
+  Serial.print(".");
+  Serial.print((EEPROM.read(45) * 256 + EEPROM.read(44)) % 1000);
+  Serial.println(" 秒.");
+  Serial.println("真是太屑了! 就不能再快点吗??");
   pinMode(4, OUTPUT);
   pinMode(9, OUTPUT);
   getMotor3Code();
   getMotor4Code();
-  if (!getKey())
-  {
+  if (!getKey()) // 校准光电
     scan();
-  }
 
   M3PID.SetMode(AUTOMATIC);   //设置PID为自动模式
   M3PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
+  M3PID.SetOutputLimits(-255, 255);
+
   M4PID.SetMode(AUTOMATIC);   //设置PID为自动模式
   M4PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
-
-  M3PID.SetOutputLimits(-255, 255);
   M4PID.SetOutputLimits(-255, 255);
+
   setRGB(7);
   see();
-  // initangle();
+
   inittimer();
-  // unsigned long tm = millis();
-  // ......
-  // tm = millis() - tm;
-  // 毫秒 micros();
-  // 微秒 millis();
+
   ADC_TD[0] = EEPROM.read(1) * 4;
   ADC_TD[1] = EEPROM.read(2) * 4;
   ADC_TD[2] = EEPROM.read(3) * 4;
