@@ -91,33 +91,33 @@ void line(int speed)
   }
   else if (S3 && S2)
   {
-    set_2Motor(speed - 5, speed);
+    set_2Motor(speed * 0.85, speed);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(speed, speed - 5);
+    set_2Motor(speed, speed * 0.85);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(speed - 15, speed);
+    set_2Motor(speed * 0.5, speed);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(speed, speed - 15);
+    set_2Motor(speed, speed * 0.5);
     g_linestate = 4;
   }
   else
   {
     if (g_linestate == 2)
     {
-      set_2Motor(-2, speed);
+      set_2Motor(20, speed);
     }
     else
     {
-      set_2Motor(speed, -2);
+      set_2Motor(speed, 20);
     }
   }
   if (S1)
@@ -201,7 +201,7 @@ void golinecode(long code, int speed = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int total_line, int speed = 60, int endtime = -1)
+void goline(int total_line, int speed = 85, int endtime = -1)
 {
   unsigned long T1 = 0, T5 = 0, T = millis();
   int count = 0;
@@ -210,7 +210,7 @@ void goline(int total_line, int speed = 60, int endtime = -1)
     getState();
     T1 = (S1 ? millis() : T1);
     T5 = (S5 ? millis() : T5);
-    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 800) // 到达一根线了~
+    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 400) // 到达一根线了~
     {
       T1 = T5 = 0; // 重置定时
       count++;     // 走完一根线了
@@ -222,7 +222,6 @@ void goline(int total_line, int speed = 60, int endtime = -1)
     }
     line(speed);
   }
-  set_2Motor(0, 0);
 }
 //光电转弯，spL，spR左右马速度，sensor为遇线停的光电
 void Turn(int spL, int spR, int sensor)

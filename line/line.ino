@@ -22,10 +22,11 @@ void team_select()
 
 // =========== 转弯 ===========
 // 0 左转   1 右转
-inline void turn(bool direction, int speed = 40)
+inline void turn(bool direction, int speed = 35)
 {
-  Turn(speed * (direction ? 1 : -1.1),
-       speed * (direction ? -1.1 : 1),
+  // set_2Motor(-10, -10);
+  Turn(speed * (direction ? 1 : -0.8),
+       speed * (direction ? -0.8 : 1),
        (direction ? 5 : 1));
 }
 
@@ -54,25 +55,18 @@ bool get_color()
 }
 
 // =========== 送货部分 ===========
-void send(int number, int team, int line = 3)
+void send(int number, int team, int line)
 {
   gocode(800, 50, 50); // 给速度让机器先越过彩色区域
   goline(line - 1);
-  if (number != 0)
-  {
-    turn(team == RED);
-    goline(2 * number);
-    turn(team == BLUE);
-    goline(5 - line);
-    goline(1, 15, 1000);
-  }
-  else // number == 0
-  {
-    if (line == 1)
-      gocode(500, 40, 40);
-    goline(3);
-    goline(1, 5, 1000);
-  }
+
+  turn(team == RED);
+  // goline(1, 50);
+  goline(2 * number);
+  turn(team == BLUE);
+  goline(5 - line);
+  goline(1, 20, 1000);
+  set_2Motor(0, 0);
 
   setservo(4, 110); // 卸货
   delay(500);       // 扔块
@@ -85,17 +79,16 @@ void send(int number, int team, int line = 3)
     goline(5 - line, 40); // (line == 4 ? 40 : 50)
   }
   else
-    gocode(80, 50, 50);
-  if (number != 0)
-  {
-    turn(team == RED);
-    goline(2 * number);
-    turn(team == BLUE);
-    goline(line - 1);
-  }
-  else
-    goline(3);
-  gocode(400, 40, 40);
+    gocode(40, 50, 50);
+
+  turn(team == RED);
+  // goline(1, 50);
+  goline(2 * number);
+  turn(team == BLUE);
+  // goline(1, 50);
+  goline(line - 2);
+
+  gocode(1000, 40, 40);
   gocode(1080, 40, -35); // 右转一点
   gocode(400, -40, -40); // 后退
   gotime(200, -30, -30); // 再后退
@@ -124,13 +117,13 @@ void time_test(int line)
   delay(1000);
   EEPROM.write(44, clock % 256);
   EEPROM.write(45, clock / 256);
-  tone(9, numbertone[(clock / 10000) % 10], 800);
+  newtone(numbertone[(clock / 10000) % 10], 800);
   delay(800);
-  tone(9, numbertone[(clock / 1000) % 10], 800);
+  newtone(numbertone[(clock / 1000) % 10], 800);
   delay(800);
-  tone(9, numbertone[(clock / 100) % 10], 800);
+  newtone(numbertone[(clock / 100) % 10], 800);
   delay(800);
-  tone(9, numbertone[(clock / 10) % 10], 800);
+  newtone(numbertone[(clock / 10) % 10], 800);
   delay(2000);
 }
 
