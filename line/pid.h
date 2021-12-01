@@ -70,12 +70,7 @@ void moving()
 }
 void resetPid()
 {
-  M3S = 0;
-  M4S = 0;
-  ref3 = 0;
-  ref4 = 0;
-  M3PWMOUT = 0;
-  M4PWMOUT = 0;
+  M3S = M4S = ref3 = ref4 = M3PWMOUT = M4PWMOUT = 0;
   setClearCodePin(M3);
   setClearCodePin(M4);
 
