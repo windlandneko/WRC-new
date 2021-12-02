@@ -7,6 +7,16 @@ int ADC_TD[5] = {0, 0, 0, 0, 0};
 int ccount = 0;
 int isbeep = 0;
 int beepcount = 0;
+
+inline void memwrite(int value, int index)
+{
+  EEPROM.write(index * 2 + 1000, value % 256);
+  EEPROM.write(index * 2 + 1001, value / 256);
+}
+inline long memread(int index)
+{
+  return EEPROM.read(index * 2 + 1000) + 256 * EEPROM.read(index * 2 + 1001);
+}
 void newtone(int frequency, int duration)
 {
   FlexiTimer2::stop();
@@ -69,8 +79,8 @@ void pid()
 }
 void inittimer()
 {
-  FlexiTimer2::set(ms, 1.0 / 1000, pid); //  ms代表ms次计数 ， 1.0/1000表示分辨率是1ms  ，pid代表的是你的回调函数
-  FlexiTimer2::start();                  //开启定时器
+  FlexiTimer2::set(ms, pid); //  ms代表ms次计数 ， 1.0/1000表示分辨率是1ms  ，pid代表的是你的回调函数
+  FlexiTimer2::start();      //开启定时器
 }
 
 //获得5个光电的状态值
@@ -91,33 +101,33 @@ void line(int speed)
   }
   else if (S3 && S2)
   {
-    set_2Motor(speed * 0.9, speed);
+    set_2Motor(speed - 5, speed);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(speed, speed * 0.9);
+    set_2Motor(speed, speed - 5);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(speed * 0.6, speed);
+    set_2Motor(speed - 15, speed);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(speed, speed * 0.6);
+    set_2Motor(speed, speed - 15);
     g_linestate = 4;
   }
   else
   {
     if (g_linestate == 2)
     {
-      set_2Motor(20, speed);
+      set_2Motor(-2, speed);
     }
     else
     {
-      set_2Motor(speed, 20);
+      set_2Motor(speed, -2);
     }
   }
   if (S1)
@@ -201,7 +211,7 @@ void golinecode(long code, int speed = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int total_line, int speed = 85, int endtime = -1)
+void goline(int total_line, int speed = 60, int endtime = -1)
 {
   unsigned long T1 = 0, T5 = 0, T = millis();
   int count = 0;
@@ -210,7 +220,7 @@ void goline(int total_line, int speed = 85, int endtime = -1)
     getState();
     T1 = (S1 ? millis() : T1);
     T5 = (S5 ? millis() : T5);
-    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 400) // 到达一根线了~
+    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 800) // 到达一根线了~
     {
       T1 = T5 = 0; // 重置定时
       count++;     // 走完一根线了
@@ -222,6 +232,7 @@ void goline(int total_line, int speed = 85, int endtime = -1)
     }
     line(speed);
   }
+  set_2Motor(0, 0);
 }
 //光电转弯，spL，spR左右马速度，sensor为遇线停的光电
 void Turn(int spL, int spR, int sensor)
@@ -447,14 +458,6 @@ void scan()
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
 void init_light_sensor()
 {
-  Serial.begin(115200);
-  Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
-  Serial.print("啊这... 这个车平均送一次货需要 ");
-  Serial.print((EEPROM.read(45) * 256 + EEPROM.read(44)) / 1000);
-  Serial.print(".");
-  Serial.print((EEPROM.read(45) * 256 + EEPROM.read(44)) % 1000);
-  Serial.println(" 秒.");
-  Serial.println("真是太屑了! 就不能再快点吗??");
   pinMode(4, OUTPUT);
   pinMode(9, OUTPUT);
   getMotor3Code();
@@ -480,4 +483,27 @@ void init_light_sensor()
   ADC_TD[2] = EEPROM.read(3) * 4;
   ADC_TD[3] = EEPROM.read(4) * 4;
   ADC_TD[4] = EEPROM.read(5) * 4;
+}
+
+void analysis()
+{
+  Serial.begin(115200);
+  Serial.println("Ver 2");
+  Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
+  if (memread(0) < memread(1))
+    memwrite(memread(0), 1);
+  Serial.print("啊这... 这个车上次送货需要 ");
+  Serial.print(memread(0) / 1000);
+  Serial.print(".");
+  Serial.print(memread(0) % 1000);
+  Serial.println(" 秒.");
+  Serial.print("而历史送货记录为 ");
+  Serial.print(memread(1) / 1000);
+  Serial.print(".");
+  Serial.print(memread(1) % 1000);
+  Serial.println(" 秒, 真是太屑了! 就不能再快点吗??");
+  memwrite(memread(2) + 1, 2);
+  Serial.print("这是自 2021/12/02 16:14 以来第 ");
+  Serial.print(memread(2));
+  Serial.println(" 次启动这辆车了.");
 }

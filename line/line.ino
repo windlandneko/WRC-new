@@ -5,8 +5,10 @@
 // 扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 // 这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
 int team, halftime; // 红蓝方信息数值为1时为红方出发
-int color, id[2] = {1, 2};
+int color, id[2];   // red 3 blue 2
 // 通过手动转动左或者右马达后，启动机器，完成机器选择红蓝方启动的过程
+
+
 void selectRG()
 {
   if (getMotor4Code() > 100)
@@ -23,9 +25,16 @@ void selectRG()
 inline void turn(bool direction, int speed = 45)
 {
   // set_2Motor(-10, -10);
-  Turn((direction ? 45 : -15),
-       (direction ? -15 : 45),
-       (direction ? 4 : 2));
+  Turn((direction ? 45 : -30),
+       (direction ? -30 : 45),
+       (direction ? 5 : 1));
+}
+inline void weird_turn(bool direction)
+{
+  // set_2Motor(-10, -10);
+  Turn((direction ? 50 : -15),
+       (direction ? -15 : 50),
+       (direction ? 5 : 1));
 }
 
 // =========== 等待货物 ===========
@@ -36,6 +45,7 @@ bool get_color()
   resetPid();
   while (true)
   {
+    set_2Motor(0, 0);
     R = getColorSensorPin(0, 6); // 获得颜色传感器R红色分量
     G = getColorSensorPin(0, 7); // 获得颜色传感器G
     B = getColorSensorPin(0, 8); // 获得颜色传感器B蓝色分量
@@ -79,12 +89,12 @@ bool get_color()
 
 void send(int number, int team, int line = 3)
 {
-  gocode((line == 1 ? 300 : 800), 50, 50); // 给速度让机器先越过彩色区域
-  goline(line - 1, 50);
+  gocode((line == 1 ? 270 : 700), 60, 60); // 给速度让机器先越过彩色区域
+  goline(line - 1, 55);
   if (number != 0)
   {
     turn(team == RED);
-    goline(2 * number - (number == 4 ? 1 : 0), 50);
+    goline(2 * number - (number == 4 ? 1 : 0), 55);
     turn(team == BLUE);
     goline(5 - line, 40);
     goline(1, 20, true);
@@ -96,23 +106,26 @@ void send(int number, int team, int line = 3)
     goline(4, 45);
     goline(1, 20, true);
   }
-
-  setservo(4, 110); // 卸货
+  set_2Motor(0, 0);
+  setservo(4, 150); // 卸货
   delay(500);
   setservo(4, 75); // 恢复接货
 
-  Turn(-50, 50, 2); // 原地转180°掉头
+  if (team == BLUE)
+    Turn(-50, 50, 2); // 原地转180°掉头
+  else
+    Turn(50, -50, 4);
   if (line != 4)
   {
     golinecode(750); // 用编码前进一点距离，越过第一个路口
     goline(4 - line, 50);
   }
   else
-    gocode(50, 40, 40);
+    gocode(80, 40, 40);
   if (number != 0)
   {
     turn(team == RED);
-    goline(2 * number, 50);
+    goline(2 * number, 55);
     turn(team == BLUE);
     goline(line - 1, 50);
   }
@@ -121,10 +134,43 @@ void send(int number, int team, int line = 3)
 
   if (line != 1)
     gocode(550, 45, 45); // 这里处理需要仔细调试，先向前走550距离
-  gocode(1100, 40, -40); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  gocode(300, -40, -40); // 然后让机器后退一定距离
+  gocode(1150, 40, -40); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
+  gocode(200, -40, -40); // 然后让机器后退一定距离
   gotime(200, -30, -30); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
+  resetPid();
+  set_2Motor(0, 0);
 }
+
+void quick_send(int number, int team)
+{
+  gocode(690, 60, 60); // 给速度让机器先越过彩色区域
+  goline(3, 55);
+
+  turn(team == RED);
+  goline(2 * number - (number == 4 ? 1 : 0), 55);
+  turn(team == BLUE);
+  goline(1, 40);
+  goline(1, 20, true);
+
+  set_2Motor(0, 0);
+  setservo(4, 150); // 卸货
+  delay(500);
+  setservo(4, 75); // 恢复接货
+
+  gotime(600, -40, -40);
+  weird_turn(team == BLUE);
+  goline(2 * number, 55);
+  turn(team == BLUE);
+  goline(3, 50);
+
+  gocode(510, 45, 45); // 这里处理需要仔细调试，先向前走550距离
+  gocode(1250, 40, -40);                        // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
+  gocode(500, -30, -30);                        // 然后让机器后退一定距离
+  gotime(300, -10, -10);                        // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
+
+  resetPid();
+}
+
 // =========== 时间测试 ===========
 void time_test(int line)
 {
@@ -133,21 +179,20 @@ void time_test(int line)
   clock = millis();
 
   delay(1000);
-  send(2, team, line);
+  quick_send(2, team);
   delay(1000);
-  send(3, team, line);
+  quick_send(3, team);
   resetPid();
 
   clock = (millis() - clock - 2000) / 2;
   delay(1000);
-  EEPROM.write(44, clock % 256);
-  EEPROM.write(45, clock / 256);
+  memwrite(clock, 0);
   newtone(numbertone[(clock / 10000) % 10], 800);
-  delay(400);
+  delay(300);
   newtone(numbertone[(clock / 1000) % 10], 800);
-  delay(400);
+  delay(300);
   newtone(numbertone[(clock / 100) % 10], 800);
-  delay(400);
+  delay(300);
   newtone(numbertone[(clock / 10) % 10], 800);
   delay(2000);
   resetPid();
@@ -155,20 +200,26 @@ void time_test(int line)
 // 程序开始
 void setup()
 {
-  setMusic(0); // 播放美妙的音乐
+  pigMusic(0); // 播放美妙的音乐
+  analysis();
   init_light_sensor();
   halftime = EEPROM.read(20);
-  id[RED] = EEPROM.read(15);
-  id[BLUE] = EEPROM.read(16);
+  // id[RED] = EEPROM.read(15);
+  // id[BLUE] = EEPROM.read(16);
+  id[RED] = 2;            // liquid
+  id[BLUE] = 3;           // food
   team = EEPROM.read(10); // 读取红蓝方信息
   selectRG();             // 选择红蓝方程序
   delay(200);
-  setMusic(1);     // 播放美妙的音乐
+  pigMusic(1);     // 播放美妙的音乐
   setservo(4, 75); // 进入等待获取货物状态
 
   time_test(4);
-  while(true)
-    send(id[get_color()], team, id[BLUE] + 1);
+  while (true)
+  {
+    get_color();
+    quick_send(id[color], team);
+  }
 }
 
 void loop() {}
