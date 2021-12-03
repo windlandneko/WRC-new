@@ -101,22 +101,22 @@ void line(int speed)
   }
   else if (S3 && S2)
   {
-    set_2Motor(speed - 5, speed);
+    set_2Motor(speed - 6, speed + 2);
     g_linestate = 2;
   }
   else if (S3 && S4)
   {
-    set_2Motor(speed, speed - 5);
+    set_2Motor(speed + 2, speed - 6);
     g_linestate = 4;
   }
   else if (S2)
   {
-    set_2Motor(speed - 15, speed);
+    set_2Motor(speed - 18, speed + 3);
     g_linestate = 2;
   }
   else if (S4)
   {
-    set_2Motor(speed, speed - 15);
+    set_2Motor(speed + 3, speed - 18);
     g_linestate = 4;
   }
   else
@@ -488,7 +488,7 @@ void init_light_sensor()
 void analysis()
 {
   Serial.begin(115200);
-  Serial.println("Ver 2");
+  Serial.println("Ver 4");
   Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
   if (memread(0) < memread(1))
     memwrite(memread(0), 1);
