@@ -11,7 +11,7 @@ double M3count2 = 0, M4count2 = 0;
 int maxspeed = 100; //最高限速
 int pidwm = 20;     //pid频率
 int ms = 2;
-double Kp = 12, Ki = 0.4, Kd = 0.01; //PID系数
+double Kp = 12, Ki = 0.6, Kd = 0.02; //PID系数
 PID M3PID(&M3S, &M3PWMOUT, &ref3, Kp, Ki, Kd, DIRECT);
 PID M4PID(&M4S, &M4PWMOUT, &ref4, Kp, Ki, Kd, DIRECT);
 //***********************************************************************

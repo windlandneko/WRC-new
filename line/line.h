@@ -488,7 +488,7 @@ void init_light_sensor()
 void analysis()
 {
   Serial.begin(115200);
-  Serial.println("Ver 4");
+  Serial.println("Ver 6");
   Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
   if (memread(0) < memread(1))
     memwrite(memread(0), 1);

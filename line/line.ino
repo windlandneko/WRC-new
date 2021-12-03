@@ -2,6 +2,7 @@
 #include "line.h"
 #define RED 0
 #define BLUE 1
+#define END -1
 int team, color, box_id[2], iter = 0;
 bool force_send = true;
 
@@ -51,10 +52,10 @@ bool get_color()
 inline void turn(bool direction, int speed = 45)
 {
   // set_2Motor(-10, -10);
-  Turn((direction ? 35 : -15),
-       (direction ? -15 : 35),
-       (direction ? 5 : 1));
-  delay(10);
+  Turn((direction ? 30 : -15),
+       (direction ? -15 : 30),
+       (direction ? 4 : 2));
+  delay(20);
 }
 inline void weird_turn(bool direction)
 {
@@ -129,30 +130,32 @@ void quick_send(int number, int team)
   goline(2 * number - (number == 4 ? 2 : 1), 65);
   goline(2, 50);
   turn(team == BLUE);
-  goline(1, 40);
-  golineTime(20, 20);
+  goline(1, 30);
+  // golineTime(10, 20);
 
   set_2Motor(0, 0);
-  setservo(4, 150); // 卸货
+  setservo(4, 140);
   delay(500);
-  setservo(4, 75); // 恢复接货
+  setservo(4, 75);
 
-  gotime(700, -45, -45);
+  gotime(600, -40, -40);
 
-  turn(team == BLUE);
-  // goline(1, 45);
+  if (number == 2)
+    weird_turn(team == BLUE);
+  else
+    turn(team == BLUE);
+  goline(1, 55);
   // golineTime(200, 10);
   goline(2 * number - (number == 4 ? 2 : 1), 70);
   goline(2, 55);
   turn(team == BLUE);
   goline(1, 50);
-  goline(2, 70);
-  goline(2, 60);
+  goline(3, 70);
 
-  gocode(500, 45, 45);   // 这里处理需要仔细调试，先向前走550距离
-  gocode(1300, 40, -40); // 让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
-  gocode(500, -30, -30); // 然后让机器后退一定距离
-  gotime(300, -10, -10); // 再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
+  gocode(500, 45, 45);
+  gocode(1340 - (number == 2 ? 10 : 0), 40, -40);
+  gocode(500, -30, -30);
+  gotime(400, -10, -10);
 
   resetPid();
 }
@@ -191,16 +194,16 @@ void time_test(int line)
 {
   unsigned long clock;
   int numbertone[] = {TONE_CL7, TONE_C1, TONE_C2, TONE_C3, TONE_C4, TONE_C5, TONE_C6, TONE_C7, TONE_CH1, TONE_CH2};
-  clock = millis();
 
   delay(1000);
+  clock = millis();
   quick_send(2, team);
   delay(1000);
   quick_send(3, team);
-  resetPid();
-
-  clock = (millis() - clock - 2000) / 2;
-  delay(1000);
+  stop_all();
+  
+  clock = (millis() - clock - 1000) / 2;
+  delay(500);
   memwrite(clock, 0);
   newtone(numbertone[(clock / 10000) % 10], 800);
   delay(300);
@@ -210,7 +213,6 @@ void time_test(int line)
   delay(300);
   newtone(numbertone[(clock / 10) % 10], 800);
   delay(2000);
-  resetPid();
 }
 // 程序开始
 void setup()
@@ -227,7 +229,7 @@ void setup()
   setservo(4, 75); // 进入等待获取货物状态
 
   time_test(4);
-  int order_list[] = {-1};
+  int order_list[] = {END};
   while (true)
   {
     get_color();
