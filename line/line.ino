@@ -5,7 +5,7 @@ int team, color, iter = 0;
 // ================ 设置 ================
 int box_id[] = {near, far}; // 液体 红色 ; 食物 蓝色
 bool force_send = true,     // 是否强制预定送货位置
-    test_enable = false;    // 是否自动进行时间测试
+    test_enable = true;    // 是否自动进行时间测试
 int order_list[] = {0,      // 强制预定列表 (运行中按键取消)
                     RED, RED, RED, BLUE, BLUE, END};
 // =====================================
@@ -77,13 +77,13 @@ void quick_send(int number, int team)
   else
     turn(team == BLUE);
   goline(1, 55);
-  goline(2 * number - (number == 4 ? 3 : 1), 65);
+  goline(2 * number - (number == 4 ? 3 : 1), 70);
   goline(2, 45);
   turn(team == BLUE);
   goline(1, 50);
   goline(3, 70);
   gocode(500, 40, 40);
-  gocode(1150, 32, -32);
+  gocode(1180, 32, -32);
   gocode(800, -25, -25);
   gotime(200, -10, -10);
 }
