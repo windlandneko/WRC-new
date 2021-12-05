@@ -1,279 +1,144 @@
 #include "JMDlib.h"
 #include "line.h"
-#define RED 0
-#define BLUE 1
-#define END -1
-#define near 2
-#define far 3
-int team, color, iter = -1;
+//扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会右短促提示音
+//这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
+int isRedTeam=1;   //红蓝方信息数值为1时为红方出发
 
-// ================ 设置 ================
-int box_id[] = {near, far}; // 液体 红色 ; 食物 蓝色
-bool force_send = true,     // 是否强制预定送货位置
-    test_enable = true;     // 是否自动进行时间测试
-int order_list[] = {        // 强制预定列表 (运行中按键取消)
-    RED, RED, RED, BLUE, BLUE, END};
-// =====================================
-
-// =========== 等待货物 ===========
-bool get_color()
+void selectRG()
 {
-  int Rc = 0, Rb = 0, R, G, B;
-  while (true)
+  Serial.print("M3S:");
+  Serial.print(getMotor3Code());
+  Serial.print(",M4S:");
+  Serial.println(getMotor4Code());
+  if(abs(getMotor4Code()<200))
   {
-    R = getColorSensorPin(0, 6);
-    G = getColorSensorPin(0, 7);
-    B = getColorSensorPin(0, 8);
-    if (R > 15 && G > 15 && B > 15)
+    //当左马达往前转，右马达后转各200个脉冲，表示红方出发，
+    newtone(9,1100,80);
+    isRedTeam=1;
+    EEPROM.write(10,isRedTeam);//记录下当前选择
+  }
+  else
+  if(abs(getMotor3Code())>200)
+  {
+    //当左马达后转，右马达前转各200个脉冲，表示蓝方出发
+    newtone(9,1100,80);
+    delay(50);
+    newtone(9,1100,80);
+    isRedTeam=0;
+    EEPROM.write(10,isRedTeam);
+  }
+  
+  isRedTeam=EEPROM.read(10);//读取红蓝方信息
+  resetPid();
+}
+void TurnLeft()
+{
+  Turn(-5,35,2);
+  
+}
+void TurnRight()
+{
+  Turn(35,-5,4);
+  
+}
+int waitGoods()//等待检测货物状态
+{
+  int countR=0,countB=0;
+  int R=0,G=0,B=0;
+  
+  while(1)
+  {
+    R=getColorSensorPin(0,6);//获得颜色传感器R红色分量
+    G=getColorSensorPin(0,7);//获得颜色传感器G
+    B=getColorSensorPin(0,8);//获得颜色传感器B蓝色分量
+    //当数所有值大于15被认为已装货
+    if(R>15 && G>15 && B>15)
     {
-      if (R > B)
-        Rc++;
-      else
-        Rb++;
+      if(R > B)  //R大于B，被认为是红色货物
+        countR++;
+      else  //B大于R，被认为是蓝色货物
+        countB++;
     }
-    if (Rc >= 10)
-      return RED;
-    if (Rb >= 10)
-      return BLUE;
-    if (!getKey()) // 运行中按下按键 取消预定
-    {
-      if (force_send)
-      {
-        newtone(TONE_DH5, 80);
-        newtone(TONE_DH3, 80);
-      }
-      force_send = false;
-    }
+    
+    if(countR>20 )
+      return 0;
+    if(countB>20 )
+      return 2;
   }
 }
-
-// =============== 转弯 ===============
-// 0 LEFT 左转        1 RIGHT 右转
-inline void turn(bool direction, bool weird = false)
+void getGoods()//舵机初始位置(准备获取货物位置)，需要实测更改
 {
-  if (weird)
-    Turn((direction ? 35 : -17),
-         (direction ? -17 : 35),
-         (direction ? 4 : 2));
-  else
-    Turn((direction ? 45 : -15),
-         (direction ? -15 : 45),
-         (direction ? 5 : 1));
-  delay(20);
-}
-
-void quick_send(int number, int team)
-{
-  gocode(690, 60, 60);
-  goline(1, 50, true);
-  goline(2, 60);
-  turn(team == RED);
-  goline(1, 55, true);
-  goline(2 * number, 70, true);
-  goline(1, 50);
-  turn(team == BLUE);
-  goline(1, 25);
-  setservo(4, 140);
-  delay(500);
-  setservo(4, 75);
-  gotime(600, -35, -35);
-  turn(team == BLUE, number == 2);
-  goline(1, 55, true);
-  goline(2 * number, 70, true);
-  goline(1, 45);
-  turn(team == BLUE);
-  goline(1, 50, true);
-  goline(2, 70);
-  gocode(500, 40, 40);
-  gocode(1150, 35, -35);
-  gocode(800, -25, -25);
-  gotime(200, -10, -10);
-}
-
-// =============== 时间测试 ===============
-void time_test()
-{
-  unsigned long clock;
-  int numbertone[] = {TONE_CL1, TONE_C1, TONE_C2, TONE_C3, TONE_C4, TONE_C5, TONE_C6, TONE_C7, TONE_CH1, TONE_CH2};
+  setservo(4,80);
   delay(1000);
-  clock = millis();
-  quick_send(2, team);
+}
+void setGoods()//舵机卸货角度，需要实测
+{
+  setservo(4,110);
   delay(1000);
-  quick_send(3, team);
-  clock = (millis() - clock - 1000) / 2;
-  delay(500);
-  memwrite(clock, 0);
-  newtone(numbertone[(clock / 10000) % 10], 800);
-  delay(300);
-  newtone(numbertone[(clock / 1000) % 10], 800);
-  delay(300);
-  newtone(numbertone[(clock / 100) % 10], 800);
-  delay(300);
-  newtone(numbertone[(clock / 10) % 10], 800);
+}
+void H_shiwu()//红色区出发，到红方食物区卸货
+{
+  gocode(700,30,30);    //先用左右马达各30的速度走700个编码脉冲，离开红色区域
+  goline(1);            //巡线1条横线
+  TurnRight();          //右转
+  goline(4);            //巡线4条线
+  TurnLeft();           //左转
+  goline(2);            //巡线2条线
+  golinecode(650);      //编码巡线走450的距离
+  gotime(300,20,20);          //再用20速度前进一点时间，避免用编码前进卡住堵死，速度不太快
+  setGoods();           //卸货
+  delay(1000);
+  getGoods();            //恢复接货状态
+//  gocode(350,-20,-20);  //编码后退350距离
+  
+  Turn(-20,20,2);        //原地转180°掉头
+  golinecode(400);       //用编码前进一点距离，越过第一个路口
+  goline(1); 
+  TurnRight();
+  goline(4); 
+  TurnLeft();
+  goline(2); 
+  gocode(550,20,20);     //这里处理需要仔细调试，先向前走550距离
+  delay(1000);        
+  gocode(1000,15,-15);   //让机器右转一定编码值，正常这里应该让机器转180°，后退等待，但由于巡线角度以及马达等差异，无法保证180°准确值
+  delay(2000);           //这时我的处理方式是让机器角度稍微偏向左边向外，
+  gocode(600,-20,-20);   //然后让机器后退一定距离
+  gotime(600,-20,-20);   //再后退600ms，由于机器角度向外，这里需要通过后退时间，利用墙壁将机器调直,进入等待下一个货物循环，例程后续补充
+
+//  gocode(700,20,20);
+}
+void yinliao()//红方饮料区卸货
+{
+  H_shiwu();
 }
 
-// ================ 程序开始 ================
+
 void setup()
 {
-  setMusic(0); // 播放美妙的音乐
-  int rel3 = getMotor3Code(), rel4 = getMotor4Code(), T = millis();
-  bool jump_setting = false;
-  team = EEPROM.read(10);
-  test_enable = EEPROM.read(11);
-  box_id[RED] = EEPROM.read(12);
-  box_id[BLUE] = EEPROM.read(13);
-  // 输出调试信息
-  Serial.begin(115200);
-  Serial.println("Ver 10");
-  Serial.println("这辆车是 Charlie 的 ~ 请不要玩坏了哦 ~");
-  if (memread(0) < memread(1))
-    memwrite(memread(0), 1);
-  Serial.print("啊这... 这个车上次送货需要 ");
-  Serial.print(memread(0) / 1000);
-  Serial.print(".");
-  Serial.print(memread(0) % 1000);
-  Serial.println(" 秒.");
-  Serial.print("而历史送货记录为 ");
-  Serial.print(memread(1) / 1000);
-  Serial.print(".");
-  Serial.print(memread(1) % 1000);
-  Serial.println(" 秒, 真是太慢了! 就不能再快点吗??");
-  memwrite(memread(2) + 1, 2);
-  Serial.print("这是自 2021/12/02 16:14 以来第 ");
-  Serial.print(memread(2));
-  Serial.println(" 次启动这辆车了.");
-  Serial.println((test_enable ? "[x] 时间测试" : "[ ] 时间测试"));
-  Serial.println("======== 设置信息 ========");
-  int temp[4] = {-1, -1, -1, -1};
-  temp[(team == BLUE ? 3 - box_id[RED] : box_id[RED])] = RED;
-  temp[(team == BLUE ? 3 - box_id[BLUE] : box_id[BLUE])] = BLUE;
-  for (int i = 0; i < 4; i++)
-    Serial.print((temp[i] == -1 ? "[  ] " : (temp[i] == RED ? "[🟥] " : "[🟦] ")));
-  if (team == RED)  
-    Serial.println("\n🔴----+----+----+");
-  else          
-    Serial.println("\n +----+----+----🔵");
-  if (!getKey())
+  
+  initLine();
+  
+  selectRG();//选择红蓝方程序
+  getGoods();//进入等待获取货物状态
+  
+  if(1)
   {
-    newtone(TONE_CH6, 100);
-    delay(70);
-    newtone(TONE_CH6, 100);
-    while (!getKey())
+    if(waitGoods()==0)
     {
-      if (millis() - T >= 1000)
-      {
-        init_light_sensor();
-        jump_setting = true;
-        break;
-      }
+      setRGB(0);
+      H_shiwu();
     }
-    if (!jump_setting)
+    else
     {
-      // 1 选择队伍
-      newtone(TONE_CH1, 300);
-      while (getKey())
-      {
-        setRGB(team);
-        if (abs(getMotor3Code() - rel3) > 100)
-        {
-          rel3 = getMotor3Code();
-          rel4 = getMotor4Code();
-          if (team != RED)
-            newtone(TONE_CH3, 120);
-          team = RED;
-        }
-        if (abs(getMotor4Code() - rel4) > 100)
-        {
-          rel3 = getMotor3Code();
-          rel4 = getMotor4Code();
-          if (team != BLUE)
-            newtone(TONE_CH1, 120);
-          team = BLUE;
-        }
-      }
-
-      // 2 是否时间测试
-      while (!getKey())
-        ;
-      newtone(TONE_CH2, 300);
-      while (getKey())
-      {
-        setRGB(7 - !test_enable);
-        if (abs(getMotor3Code() - rel3) > 100)
-        {
-          rel3 = getMotor3Code();
-          rel4 = getMotor4Code();
-          if (!test_enable)
-            newtone(TONE_CH3, 120);
-          test_enable = true;
-        }
-        if (abs(getMotor4Code() - rel4) > 100)
-        {
-          rel3 = getMotor3Code();
-          rel4 = getMotor4Code();
-          if (test_enable)
-            newtone(TONE_CH1, 120);
-          test_enable = false;
-        }
-      }
-
-      // 3 选择盒子编号
-      while (!getKey())
-        ;
-      newtone(TONE_CH3, 300);
-      setRGB(RED);
-      delay(300);
-      newtone((box_id[RED] == 2 ? TONE_CH3 : TONE_CH4), 120);
-      delay(200);
-      setRGB(BLUE);
-      newtone((box_id[BLUE] == 2 ? TONE_CH3 : TONE_CH4), 120);
-      delay(300);
-      setRGB(6);
-      while (getKey())
-      {
-        if (abs(getMotor3Code() - rel3) > 100)
-        {
-          box_id[RED] = 2 + (getMotor3Code() > rel3);
-          setRGB(RED);
-          rel3 = getMotor3Code();
-          newtone((box_id[RED] == 2 ? TONE_CH3 : TONE_CH4), 120);
-        }
-        if (abs(getMotor4Code() - rel4) > 100)
-        {
-          box_id[BLUE] = 2 + (getMotor4Code() > rel4);
-          setRGB(BLUE);
-          rel4 = getMotor4Code();
-          newtone((box_id[BLUE] == 2 ? TONE_CH3 : TONE_CH4), 120);
-        }
-      }
-
-      // TODO 4 设置强制送达列表
+      setRGB(2);
+      H_shiwu();
     }
   }
-  EEPROM.write(10, team);
-  EEPROM.write(11, test_enable);
-  EEPROM.write(12, box_id[RED]);
-  EEPROM.write(13, box_id[BLUE]);
-  sets();
-  resetPid();
-  setRGB(team);
-  delay(200);
-  setMusic(1); // 播放美妙的音乐
-
-  setservo(4, 75); // 进入等待获取货物状态
-
-  if (test_enable)
-  {
-    while (getKey())
-      ;
-    time_test();
-  }
+  
+ 
 }
 
-void loop()
-{
-  color = get_color();
-  if (order_list[iter + 1] == -1)
-    force_send = false;
-  quick_send(box_id[(force_send ? order_list[++iter] : color)], team);
+void loop() {
+  
+
 }
