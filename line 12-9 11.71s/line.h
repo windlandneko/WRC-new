@@ -1,5 +1,10 @@
 // #include "NewPing.h"
 #include "pid.h"
+#define RED 0
+#define BLUE 1
+#define END -1
+#define near 2
+#define far 3
 int S1, S2, S3, S4, S5;
 int g_linestate = 0;
 int ADC_TD[5] = {0, 0, 0, 0, 0};
@@ -220,7 +225,7 @@ void goline(int total_line, int speed = 60, int endtime = -1)
     getState();
     T1 = (S1 ? millis() : T1);
     T5 = (S5 ? millis() : T5);
-    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 800) // 到达一根线了~
+    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 500) // 到达一根线了~
     {
       T1 = T5 = 0; // 重置定时
       count++;     // 走完一根线了
@@ -405,7 +410,7 @@ void see()
 }
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会右短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
-void scan()
+void init_light_sensor()
 {
   tone(9, 440, 500);
   while (!getKey())
@@ -456,14 +461,14 @@ void scan()
 
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
-void init_light_sensor()
+void sets()
 {
   pinMode(4, OUTPUT);
   pinMode(9, OUTPUT);
   getMotor3Code();
   getMotor4Code();
   if (!getKey()) // 校准光电
-    scan();
+    init_light_sensor();
 
   M3PID.SetMode(AUTOMATIC);   //设置PID为自动模式
   M3PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
@@ -488,7 +493,7 @@ void init_light_sensor()
 void analysis()
 {
   Serial.begin(115200);
-  Serial.println("Ver 6");
+  Serial.println("Ver 9");
   Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
   if (memread(0) < memread(1))
     memwrite(memread(0), 1);

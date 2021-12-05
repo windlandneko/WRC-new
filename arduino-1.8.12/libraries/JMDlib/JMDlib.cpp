@@ -804,12 +804,12 @@ void setRGB(uint8_t color, uint8_t B_pin = 47, uint8_t G_pin = 48, uint8_t R_pin
 		green = LOW;
 		blue = LOW;
 		break; // 红
-	case 1:
+	case 2:
 		red = LOW;
 		green = HIGH;
 		blue = LOW;
 		break; // 绿
-	case 2:
+	case 1:
 		red = LOW;
 		green = LOW;
 		blue = HIGH;
@@ -1378,7 +1378,7 @@ uint16_t getUltrasoundPin(uint8_t pin) // 输入
 /* 参数说明
  * pin: I1-I3
  * cmd:	20~28 设置灯的状态
- *		29~30保留
+ *		29~30 保留
  *		31 自动白平衡处理
  *		32 重设白平衡参考值
  *		33 恢复出厂设置

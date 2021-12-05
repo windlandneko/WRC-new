@@ -211,29 +211,27 @@ void golinecode(long code, int speed = 35, int LR = 0)
   // stop_all();
 }
 //数线循迹，默认sp速度40，选15号光电数线goline(2)：向前走两条横线，goline(2,30)用30速度走两条线
-void goline(int total_line, int speed = 60, bool going = false)
+void goline(int total_line, int speed = 60, int endtime = -1)
 {
-  unsigned long T1 = 0, T5 = 0;
+  unsigned long T1 = 0, T5 = 0, T = millis();
   int count = 0;
-  while (true)
+  while (endtime == -1 || micros() - T < endtime)
   {
     getState();
     T1 = (S1 ? millis() : T1);
     T5 = (S5 ? millis() : T5);
-    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 500) // 到达一根线了~
+    if (T1 > 0 && T5 > 0 && abs(T1 - T5) < 800) // 到达一根线了~
     {
       T1 = T5 = 0; // 重置定时
       count++;     // 走完一根线了
       if (count >= total_line)
         break;
-      while (S1 || S5)
+      while ((S1 || S5) && (endtime == -1 || micros() - T < endtime))
         line(speed);
       golineTime(300, speed);
     }
     line(speed);
   }
-  if (going)
-    golineTime(300, speed);
   set_2Motor(0, 0);
 }
 //光电转弯，spL，spR左右马速度，sensor为遇线停的光电
@@ -346,26 +344,75 @@ void see()
     int length = sizeof(ADC_TD) / sizeof(ADC_TD[0]);
     int a_state[5] = {0, 0, 0, 0, 0};
     if ((avar[1] < ADC_TD[1] && avar[2] < ADC_TD[2]) || (avar[2] < ADC_TD[2] && avar[3] < ADC_TD[3]))
+    {
       setRGB(4);
+    }
     else if ((avar[1] < ADC_TD[1] && avar[2] < ADC_TD[2] && avar[3] < ADC_TD[3]))
+    {
       setRGB(5);
+    }
     else if (avar[0] < ADC_TD[0] || avar[1] < ADC_TD[1] || avar[2] < ADC_TD[2] || avar[3] < ADC_TD[3] || avar[4] < ADC_TD[4])
+    {
       setRGB(3);
+    }
     else
+    {
       setRGB(7);
+    }
+
+    // Serial.print(ADC_TD[0]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[1]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[2]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[3]);
+    // Serial.print(",");
+    // Serial.print(ADC_TD[4]);
+    // Serial.print("---");
+
+    // Serial.print(a_state[0]);
+    // Serial.print(",");
+    // Serial.print(a_state[1]);
+    // Serial.print(",");
+    // Serial.print(a_state[2]);
+    // Serial.print(",");
+    // Serial.print(a_state[3]);
+    // Serial.print(",");
+    // Serial.println(a_state[4]);
+
+    // Serial.print(avar[0]);
+    // Serial.print(",");
+    // Serial.print(avar[1]);
+    // Serial.print(",");
+    // Serial.print(avar[2]);
+    // Serial.print(",");
+    // Serial.print(avar[3]);
+    // Serial.print(",");
+    // Serial.println(avar[4]);
     delay(100);
   }
   FlexiTimer2::stop();
+  // delay(1000);
+  // if(!getKey())
+  // {
+  //   FlexiTimer2::start();
+  //   while(getKey())
+  //     ;
+  //   checkw();
+  //   FlexiTimer2::stop();
+  // }
 }
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会右短促提示音
 //这时让机器5个光电都经过一次黑线和白色区域，然后再按一次按钮跳出扫描程序
 void init_light_sensor()
 {
-  tone(9, 880, 500);
+  tone(9, 440, 500);
+  while (!getKey())
+    ;
   delay(500);
-
-  FlexiTimer2::set(200, 1.0 / 1000, Event); // 500代表500次计数 ， 1.0/1000表示分辨率是1ms  ，Event代表的是你的回调函数
-  FlexiTimer2::start();                     // 开启定时器
+  FlexiTimer2::set(200, 1.0 / 1000, Event); //  500代表500次计数 ， 1.0/1000表示分辨率是1ms  ，Event代表的是你的回调函数
+  FlexiTimer2::start();                     //开启定时器
   int length = sizeof(ADC_TD) / sizeof(ADC_TD[0]);
   char str[4];
   int max_var[5] = {0, 0, 0, 0, 0};
@@ -389,7 +436,7 @@ void init_light_sensor()
       {
         min_ver[i] = avar[i];
       }
-      ADC_TD[i] = (max_var[i] + min_ver[i]) / 2;
+      ADC_TD[i] = (max_var[i] + min_ver[i]) * 1 / 2;
 
       /* code */
     }
@@ -405,8 +452,6 @@ void init_light_sensor()
   delay(200);
   tone(9, 440, 100);
   delay(200);
-  see();
-  inittimer();
 }
 
 //扫描程序，先把机器放到场地上，按着按钮开机，听到提示音进入扫描程序，扫描过程会有短促提示音
@@ -417,6 +462,8 @@ void sets()
   pinMode(9, OUTPUT);
   getMotor3Code();
   getMotor4Code();
+  if (!getKey()) // 校准光电
+    init_light_sensor();
 
   M3PID.SetMode(AUTOMATIC);   //设置PID为自动模式
   M3PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
@@ -426,6 +473,9 @@ void sets()
   M4PID.SetSampleTime(pidwm); //设置PID采样频率为pidwm ms
   M4PID.SetOutputLimits(-255, 255);
 
+  setRGB(7);
+  see();
+
   inittimer();
 
   ADC_TD[0] = EEPROM.read(1) * 4;
@@ -433,4 +483,27 @@ void sets()
   ADC_TD[2] = EEPROM.read(3) * 4;
   ADC_TD[3] = EEPROM.read(4) * 4;
   ADC_TD[4] = EEPROM.read(5) * 4;
+}
+
+void analysis()
+{
+  Serial.begin(115200);
+  Serial.println("Ver 6");
+  Serial.println("这辆车是 Charlie 瞎改的说 ~ 请不要玩坏了哦 ~");
+  if (memread(0) < memread(1))
+    memwrite(memread(0), 1);
+  Serial.print("啊这... 这个车上次送货需要 ");
+  Serial.print(memread(0) / 1000);
+  Serial.print(".");
+  Serial.print(memread(0) % 1000);
+  Serial.println(" 秒.");
+  Serial.print("而历史送货记录为 ");
+  Serial.print(memread(1) / 1000);
+  Serial.print(".");
+  Serial.print(memread(1) % 1000);
+  Serial.println(" 秒, 真是太屑了! 就不能再快点吗??");
+  memwrite(memread(2) + 1, 2);
+  Serial.print("这是自 2021/12/02 16:14 以来第 ");
+  Serial.print(memread(2));
+  Serial.println(" 次启动这辆车了.");
 }

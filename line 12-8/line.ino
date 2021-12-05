@@ -219,7 +219,7 @@ void setup()
 {
   setMusic(0); // 播放美妙的音乐
   analysis();
-  init_light_sensor();
+  sets();
   box_id[RED] = 2;        // liquid
   box_id[BLUE] = 3;       // food
   team = EEPROM.read(10); // 读取红蓝方信息
